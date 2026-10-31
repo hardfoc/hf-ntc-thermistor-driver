@@ -213,7 +213,7 @@ seo:
   description: >
     Hardware-agnostic NTC thermistor driver with lookup table and
     mathematical conversion methods for accurate temperature readings
-  url: "https://n3b3x.github.io/hf-ntc-thermistor-driver"
+  url: "https://hardfoc.github.io/hf-ntc-thermistor-driver"
   twitter:
     card: "summary_large_image"
     site: "@n3b3x"
