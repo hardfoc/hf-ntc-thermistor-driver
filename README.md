@@ -11,8 +11,8 @@ permalink: /
 
 [![C++](https://img.shields.io/badge/C%2B%2B-11-blue.svg)](https://en.cppreference.com/w/cpp/11)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![CI](https://github.com/N3b3x/hf-ntc-thermistor-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/N3b3x/hf-ntc-thermistor-driver/actions/workflows/esp32-examples-build-ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://n3b3x.github.io/hf-ntc-thermistor-driver/)
+[![CI](https://github.com/hardfoc/hf-ntc-thermistor-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/hardfoc/hf-ntc-thermistor-driver/actions/workflows/esp32-examples-build-ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://hardfoc.github.io/hf-ntc-thermistor-driver/)
 
 ## 📚 Table of Contents
 1. [Overview](#-overview)
@@ -28,7 +28,7 @@ permalink: /
 
 ## 📦 Overview
 
-> **📖 [📚🌐 Live Complete Documentation](https://n3b3x.github.io/hf-ntc-thermistor-driver/)** - 
+> **📖 [📚🌐 Live Complete Documentation](https://hardfoc.github.io/hf-ntc-thermistor-driver/)** - 
 > Interactive guides, examples, and step-by-step tutorials
 
 An **NTC (Negative Temperature Coefficient) thermistor** is a temperature-sensitive resistor whose resistance decreases as temperature increases. This driver provides a comprehensive, hardware-agnostic solution for temperature measurement using NTC thermistors in a voltage divider configuration. The driver supports multiple NTC types (including NTCG163JFT103FT1S, NTCG164JF103FT1S, and custom types), dual conversion methods (lookup table for speed, mathematical for accuracy), built-in calibration, filtering, and multi-sample averaging for precise temperature readings.

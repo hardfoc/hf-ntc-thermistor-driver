@@ -24,7 +24,7 @@ Before installing the driver, ensure you have:
 ### Option 1: Git Clone
 
 ```bash
-git clone https://github.com/N3b3x/hf-ntc-thermistor-driver.git
+git clone https://github.com/hardfoc/hf-ntc-thermistor-driver.git
 cd hf-ntc-thermistor-driver
 ```
 
