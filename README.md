@@ -12,15 +12,15 @@ This branch contains the versioned documentation for this repository.
 
 ## Access
 
-- **Latest**: [https://N3b3x.github.io/hf-ntc-thermistor-driver/](https://N3b3x.github.io/hf-ntc-thermistor-driver/)
-- **All Versions**: [https://N3b3x.github.io/hf-ntc-thermistor-driver/version_selector.html](https://N3b3x.github.io/hf-ntc-thermistor-driver/version_selector.html)
+- **Latest**: [https://hardfoc.github.io/hf-ntc-thermistor-driver/](https://hardfoc.github.io/hf-ntc-thermistor-driver/)
+- **All Versions**: [https://hardfoc.github.io/hf-ntc-thermistor-driver/version_selector.html](https://hardfoc.github.io/hf-ntc-thermistor-driver/version_selector.html)
 
 ## Current Version
 
 - **Version**: development
 - **Type**: development
-- **Deployed**: 2026-06-15T01:41:35Z
-- **Commit**: 721650f13c830bc957fa58909bb8fa7f29f041a7
+- **Deployed**: 2026-10-31T08:19:11Z
+- **Commit**: 7211845f110c442c5ac27ab8223a63d1c664ccfd
 
 ---
 
