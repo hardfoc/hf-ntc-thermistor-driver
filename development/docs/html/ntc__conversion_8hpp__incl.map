@@ -1,7 +1,7 @@
 <map id="inc/ntc_conversion.hpp" name="inc/ntc_conversion.hpp">
-<area shape="rect" id="Node000001" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="5,5,176,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="15,79,78,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,32,63,68,59,66,81,30"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="103,79,169,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="100,30,124,66,119,69,96,32"/>
+<area shape="rect" id="Node000001" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="5,5,176,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="15,81,78,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,32,64,69,60,66,80,35"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="102,81,167,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="100,31,122,68,116,68,97,36"/>
 </map>

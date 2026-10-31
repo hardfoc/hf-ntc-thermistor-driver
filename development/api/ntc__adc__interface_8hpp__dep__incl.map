@@ -1,13 +1,13 @@
 <map id="inc/ntc_adc_interface.hpp" name="inc/ntc_adc_interface.hpp">
-<area shape="rect" id="Node000001" title="CRTP&#45;based template interface for ADC used by NTC thermistor driver." alt="" coords="135,5,323,31"/>
-<area shape="rect" id="Node000002" href="$mock__esp32__adc_8hpp.html" title="Mock ADC implementation for ESP32&#45;C6 testing." alt="" coords="51,79,217,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,41,159,81,155,76,203,37"/>
-<area shape="rect" id="Node000004" href="$ntc__thermistor_8hpp.html" title="Hardware&#45;agnostic NTC thermistor driver for temperature measurement." alt="" coords="248,86,415,111"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="257,37,318,84,315,88,253,41"/>
-<area shape="rect" id="Node000003" href="$ntc__thermistor__comprehensive__test_8cpp.html" title="Comprehensive test suite for NTC Thermistor driver on ESP32&#45;C6." alt="" coords="5,167,233,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="132,133,126,167,121,166,126,132"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="294,119,180,169,178,164,292,114"/>
-<area shape="rect" id="Node000005" href="$ntc__thermistor_8ipp.html" title="Hardware&#45;agnostic NTC thermistor driver implementation." alt="" coords="258,181,421,207"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="328,125,335,181,330,182,323,125"/>
-<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="343,168,336,112,341,111,348,167"/>
+<area shape="rect" id="Node000001" title="CRTP&#45;based template interface for ADC used by NTC thermistor driver." alt="" coords="133,5,321,33"/>
+<area shape="rect" id="Node000002" href="$mock__esp32__adc_8hpp.html" title="Mock ADC implementation for ESP32&#45;C6 testing." alt="" coords="43,81,208,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,45,154,82,151,78,201,41"/>
+<area shape="rect" id="Node000004" href="$ntc__thermistor_8hpp.html" title="Hardware&#45;agnostic NTC thermistor driver for temperature measurement." alt="" coords="246,90,413,117"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="256,40,316,89,311,89,255,46"/>
+<area shape="rect" id="Node000003" href="$ntc__thermistor__comprehensive__test_8cpp.html" title="Comprehensive test suite for NTC Thermistor driver on ESP32&#45;C6." alt="" coords="5,174,233,235"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,139,123,174,119,172,121,143"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="291,123,185,175,182,171,285,125"/>
+<area shape="rect" id="Node000005" href="$ntc__thermistor_8ipp.html" title="Hardware&#45;agnostic NTC thermistor driver implementation." alt="" coords="256,191,419,218"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="326,131,333,192,328,189,322,135"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="341,174,335,120,339,116,346,177"/>
 </map>

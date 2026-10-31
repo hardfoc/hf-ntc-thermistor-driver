@@ -1,12 +1,12 @@
 <map id="src/ntc_conversion.cpp" name="src/ntc_conversion.cpp">
-<area shape="rect" id="Node000001" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="51,5,222,31"/>
-<area shape="rect" id="Node000002" href="$ntc__conversion_8hpp.html" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="63,79,211,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,31,139,65,134,65,134,31"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,68,177"/>
-<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="112,33,80,52,54,80,42,109,39,138,33,138,37,108,49,77,77,48,109,28"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="235,79,321,104"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="161,28,244,70,242,75,158,33"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,106,66,146,63,142,119,102"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="103,152,170,177"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="139,104,139,138,134,138,134,104"/>
+<area shape="rect" id="Node000001" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="50,5,220,33"/>
+<area shape="rect" id="Node000002" href="$ntc__conversion_8hpp.html" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="62,81,209,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,31,138,66,133,64,134,36"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,157,68,184"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="104,36,77,55,52,82,41,112,38,142,33,141,36,110,48,80,74,51,108,32"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="233,81,317,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="161,31,239,73,234,74,160,36"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,109,67,150,64,145,115,110"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="102,157,168,184"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="137,107,138,142,133,140,133,111"/>
 </map>

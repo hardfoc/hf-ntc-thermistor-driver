@@ -1,33 +1,33 @@
 <map id="inc/ntc_thermistor.hpp" name="inc/ntc_thermistor.hpp">
-<area shape="rect" id="Node000001" title="Hardware&#45;agnostic NTC thermistor driver for temperature measurement." alt="" coords="341,5,507,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="193,225,260,251"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,32,242,50,188,64,137,81,65,106,38,122,14,153,8,174,14,190,31,204,55,214,117,228,180,233,179,238,117,233,53,219,28,208,10,194,3,174,10,151,35,118,62,101,135,76,187,59,241,45,340,26"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="536,79,613,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="449,28,539,70,536,75,447,33"/>
-<area shape="rect" id="Node000004" href="$ntc__adc__interface_8hpp.html" title="CRTP&#45;based template interface for ADC used by NTC thermistor driver." alt="" coords="24,152,189,177"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="341,26,298,32,253,43,209,59,168,81,139,109,119,141,115,139,135,106,165,77,207,54,252,38,297,27,340,21"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="637,79,821,104"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="474,28,667,73,666,78,472,33"/>
-<area shape="rect" id="Node000006" href="$ntc__types_8hpp.html" title="Type definitions for NTC thermistor driver." alt="" coords="179,79,293,104"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="395,33,280,76,278,71,393,28"/>
-<area shape="rect" id="Node000007" href="$ntc__thermistor_8ipp.html" title="Hardware&#45;agnostic NTC thermistor driver implementation." alt="" coords="337,79,511,104"/>
-<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="420,31,418,65,413,65,414,31"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="127,175,196,216,194,220,125,180"/>
-<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="238,105,231,212,226,211,233,104"/>
-<area shape="poly" id="edge15_Node000007_Node000001" title=" " alt="" coords="428,78,430,44,435,45,433,79"/>
-<area shape="rect" id="Node000008" href="$ntc__conversion_8hpp.html" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="539,152,687,177"/>
-<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="455,102,570,144,569,149,453,107"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="638,225,701,251"/>
-<area shape="poly" id="edge17_Node000007_Node000009" title=" " alt="" coords="501,101,625,124,675,137,702,150,709,166,707,184,691,215,686,213,702,182,704,167,698,154,673,142,624,129,500,107"/>
-<area shape="rect" id="Node000010" href="$ntc__lookup__table_8hpp.html" title="Lookup table implementation for NTC thermistor temperature conversion." alt="" coords="355,152,515,177"/>
-<area shape="poly" id="edge12_Node000007_Node000010" title=" " alt="" coords="428,104,434,138,428,139,423,105"/>
-<area shape="rect" id="Node000012" title=" " alt="" coords="763,152,848,177"/>
-<area shape="poly" id="edge16_Node000007_Node000012" title=" " alt="" coords="486,101,750,150,749,156,485,107"/>
-<area shape="rect" id="Node000013" title=" " alt="" coords="264,152,331,177"/>
-<area shape="poly" id="edge18_Node000007_Node000013" title=" " alt="" coords="405,106,331,147,329,143,402,102"/>
-<area shape="poly" id="edge11_Node000008_Node000002" title=" " alt="" coords="552,180,274,231,273,225,551,175"/>
-<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="625,176,654,213,650,216,620,179"/>
-<area shape="poly" id="edge14_Node000010_Node000002" title=" " alt="" coords="402,180,274,223,272,218,400,175"/>
-<area shape="rect" id="Node000011" title=" " alt="" coords="399,225,470,251"/>
-<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="437,178,437,212,432,212,432,178"/>
+<area shape="rect" id="Node000001" title="Hardware&#45;agnostic NTC thermistor driver for temperature measurement." alt="" coords="339,5,506,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="194,232,259,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,32,241,52,188,66,137,84,64,109,38,126,14,158,8,179,14,196,30,209,54,220,116,234,181,243,176,244,115,240,53,225,28,214,10,199,3,179,9,155,34,122,62,104,135,78,186,61,240,47,341,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="534,81,610,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="450,31,534,74,529,74,449,36"/>
+<area shape="rect" id="Node000004" href="$ntc__adc__interface_8hpp.html" title="CRTP&#45;based template interface for ADC used by NTC thermistor driver." alt="" coords="24,157,189,184"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="337,26,298,34,253,45,210,61,169,83,141,112,121,144,116,141,137,108,166,79,207,56,252,40,297,29,341,24"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="634,81,817,109"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="477,31,659,76,653,77,477,36"/>
+<area shape="rect" id="Node000006" href="$ntc__types_8hpp.html" title="Type definitions for NTC thermistor driver." alt="" coords="180,81,292,109"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="387,35,284,78,282,73,391,32"/>
+<area shape="rect" id="Node000007" href="$ntc__thermistor_8ipp.html" title="Hardware&#45;agnostic NTC thermistor driver implementation." alt="" coords="335,81,510,109"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="417,31,416,67,411,64,414,36"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="129,182,195,223,190,225,127,187"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="237,107,231,218,226,216,233,110"/>
+<area shape="poly" id="edge15_Node000007_Node000001" title=" " alt="" coords="427,79,430,51,433,46,432,82"/>
+<area shape="rect" id="Node000008" href="$ntc__conversion_8hpp.html" title="Mathematical conversion functions for NTC thermistor temperature." alt="" coords="537,157,684,184"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="457,107,566,151,561,151,456,112"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="634,232,696,260"/>
+<area shape="poly" id="edge17_Node000007_Node000009" title=" " alt="" coords="506,107,625,130,673,142,698,155,705,171,704,189,687,222,684,218,699,188,700,172,694,159,671,147,624,135,506,112"/>
+<area shape="rect" id="Node000010" href="$ntc__lookup__table_8hpp.html" title="Lookup table implementation for NTC thermistor temperature conversion." alt="" coords="354,157,513,184"/>
+<area shape="poly" id="edge12_Node000007_Node000010" title=" " alt="" coords="426,107,431,143,427,140,423,111"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="759,157,843,184"/>
+<area shape="poly" id="edge16_Node000007_Node000012" title=" " alt="" coords="493,107,740,154,747,158,741,157,739,159,492,112"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="265,157,330,184"/>
+<area shape="poly" id="edge18_Node000007_Node000013" title=" " alt="" coords="403,108,333,151,331,146,398,110"/>
+<area shape="poly" id="edge11_Node000008_Node000002" title=" " alt="" coords="544,187,275,238,274,233,539,183"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="622,182,649,221,644,219,619,187"/>
+<area shape="poly" id="edge14_Node000010_Node000002" title=" " alt="" coords="399,185,275,231,273,226,394,185"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="399,232,468,260"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="435,183,435,218,431,215,431,187"/>
 </map>

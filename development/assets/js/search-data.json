@@ -645,7 +645,7 @@
   },"92": {
     "doc": "🛠️ Installation",
     "title": "Option 1: Git Clone",
-    "content": "| 1 2 . | git clone https://github.com/N3b3x/hf-ntc-thermistor-driver.git cd hf-ntc-thermistor-driver . | . ",
+    "content": "| 1 2 . | git clone https://github.com/hardfoc/hf-ntc-thermistor-driver.git cd hf-ntc-thermistor-driver . | . ",
     "url": "/hf-ntc-thermistor-driver/development/docs/installation/#option-1-git-clone",
     
     "relUrl": "/docs/installation/#option-1-git-clone"
