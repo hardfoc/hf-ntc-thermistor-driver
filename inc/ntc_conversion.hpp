@@ -305,6 +305,318 @@ bool CalculateSteinhartHartCoefficients(
     float *coeff_a, float *coeff_b, float *coeff_c) noexcept;
 
 /**
+ * @brief Worst-case temperature error from the R25 and B tolerances
+ *
+ * Converts R to T with the Beta equation, then adds the two worst-case
+ * errors: R25 tolerance, T^2/B * tol_R, and B tolerance,
+ * |T * (1 - T/T25)| * tol_B. For the NTCG163JF103FT1S (R25 +/- 1 %,
+ * B25/85 +/- 1 %) this reproduces the spec sheet's Table 3 Min/Max band:
+ * 0.26 C at 25 C, 1.1 C at 85 C.
+ *
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param resistance_at_25c R25 (ohms), e.g. ntc_config_t::resistance_at_25c
+ * @param beta_value B (K), e.g. ntc_config_t::beta_value
+ * @param resistance_tolerance R25 tolerance (fraction, 0.01 for 1 %)
+ * @param beta_tolerance B tolerance (fraction)
+ * @param accuracy_celsius Pointer to store the error bound (°C)
+ * @return true if successful, false otherwise
+ */
+bool CalculateTemperatureAccuracy(float resistance_ohms,
+                                  float resistance_at_25c, float beta_value,
+                                  float resistance_tolerance,
+                                  float beta_tolerance,
+                                  float *accuracy_celsius) noexcept;
+
+/**
+ * @brief Temperature error estimate for the default part (R25 = 10 kOhm,
+ *        B = 3435 K)
+ * @deprecated Pass R25 and B: use the six-argument overload.
+ */
+[[deprecated("pass R25 and B: CalculateTemperatureAccuracy(R, r25, beta, "
+             "tol_r, tol_b, &acc)")]]
+bool CalculateTemperatureAccuracy(float resistance_ohms,
+                                  float resistance_tolerance,
+                                  float beta_tolerance,
+                                  float *accuracy_celsius) noexcept;
+
+/**
+ * @brief Calculate optimal series resistance for voltage divider
+ *
+ * The geometric mean of R at the two ends of the range, from the Beta
+ * equation with the given R25 and B.
+ *
+ * @param thermistor_resistance_at_25c Thermistor resistance at 25°C (ohms)
+ * @param beta_value B (K), e.g. ntc_config_t::beta_value
+ * @param min_temperature Minimum temperature (°C)
+ * @param max_temperature Maximum temperature (°C)
+ * @param optimal_resistance Pointer to store optimal series resistance (ohms)
+ * @return true if successful, false otherwise
+ */
+bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
+                                      float beta_value, float min_temperature,
+                                      float max_temperature,
+                                      float *optimal_resistance) noexcept;
+
+/**
+ * @brief Optimal series resistance assuming B = 3435 K
+ * @deprecated Pass B: use the overload that takes beta_value.
+ */
+[[deprecated("pass B: CalculateOptimalSeriesResistance(r25, beta, t_min, "
+             "t_max, &r)")]]
+bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
+                                      float min_temperature,
+                                      float max_temperature,
+                                      float *optimal_resistance) noexcept;
+
+} // namespace NTC::Constants
+
+//--------------------------------------
+//  Conversion Methods
+//--------------------------------------
+
+namespace NTC {
+
+/**
+ * @brief Convert resistance to temperature using beta parameter
+ *
+ * Uses the beta parameter equation to calculate temperature from resistance.
+ * This is a simplified model that assumes a linear relationship in the
+ * temperature-resistance curve around the reference temperature.
+ *
+ * @note The beta parameter method is faster but less accurate than
+ *       Steinhart-Hart, especially at temperature extremes.
+ *
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param resistance_at_25c Resistance at 25°C (ohms)
+ * @param beta_value Beta value (K), typically 3000-4000K for NTC thermistors
+ * @param temperature_celsius Pointer to store temperature (°C)
+ * @return true if successful, false otherwise
+ *
+ * @warning Input resistance must be positive and non-zero. Beta value should
+ *          be within valid range (1000-5000K).
+ */
+bool ConvertResistanceToTemperatureBeta(float resistance_ohms,
+                                        float resistance_at_25c,
+                                        float beta_value,
+                                        float *temperature_celsius) noexcept;
+
+/**
+ * @brief Convert temperature to resistance using beta parameter
+ * @param temperature_celsius Temperature (°C)
+ * @param resistance_at_25c Resistance at 25°C (ohms)
+ * @param beta_value Beta value (K)
+ * @param resistance_ohms Pointer to store resistance (ohms)
+ * @return true if successful, false otherwise
+ */
+bool ConvertTemperatureToResistanceBeta(float temperature_celsius,
+                                        float resistance_at_25c,
+                                        float beta_value,
+                                        float *resistance_ohms) noexcept;
+
+/**
+ * @brief Convert resistance to temperature using Steinhart-Hart equation
+ *
+ * Uses the Steinhart-Hart equation for high-accuracy temperature calculation.
+ * This method provides better accuracy across a wider temperature range
+ * compared to the beta parameter method.
+ *
+ * The Steinhart-Hart equation: 1/T = A + B*ln(R) + C*ln(R)³
+ *
+ * @note This method is more computationally expensive but provides superior
+ *       accuracy, especially at temperature extremes.
+ *
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param coeff_a Steinhart-Hart coefficient A (about 0.9e-3 for a 10 kOhm part)
+ * @param coeff_b Steinhart-Hart coefficient B (about 2.5e-4)
+ * @param coeff_c Steinhart-Hart coefficient C (about 1e-7 to 2e-7)
+ * @param temperature_celsius Pointer to store temperature (°C)
+ * @return true if successful, false otherwise
+ *
+ * @see ValidateSteinhartHartCoefficients() to validate coefficients
+ */
+bool ConvertResistanceToTemperatureSteinhartHart(
+    float resistance_ohms, float coeff_a, float coeff_b, float coeff_c,
+    float *temperature_celsius) noexcept;
+
+/**
+ * @brief Convert temperature to resistance using Steinhart-Hart equation
+ *
+ * Solves C*x^3 + B*x + (A - 1/T) = 0 for x = ln(R) exactly (the C term
+ * included), so it is the inverse of
+ * ConvertResistanceToTemperatureSteinhartHart().
+ *
+ * @param temperature_celsius Temperature (°C)
+ * @param coeff_a Steinhart-Hart coefficient A
+ * @param coeff_b Steinhart-Hart coefficient B
+ * @param coeff_c Steinhart-Hart coefficient C
+ * @param resistance_ohms Pointer to store resistance (ohms)
+ * @return true if successful, false otherwise
+ */
+bool ConvertTemperatureToResistanceSteinhartHart(
+    float temperature_celsius, float coeff_a, float coeff_b, float coeff_c,
+    float *resistance_ohms) noexcept;
+
+/**
+ * @brief Convert resistance to temperature using default Steinhart-Hart
+ * coefficients
+ *
+ * The defaults (STEINHART_HART_A_/B_/C_) are fitted to the TDK
+ * NTCG163JF103FT1S; use ConvertResistanceToTemperatureSteinhartHart() with
+ * your own coefficients for any other part.
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param temperature_celsius Pointer to store temperature (°C)
+ * @return true if successful, false otherwise
+ */
+bool ConvertResistanceToTemperatureDefault(float resistance_ohms,
+                                           float *temperature_celsius) noexcept;
+
+/**
+ * @brief Convert temperature to resistance using default Steinhart-Hart
+ * coefficients
+ * @param temperature_celsius Temperature (°C)
+ * @param resistance_ohms Pointer to store resistance (ohms)
+ * @return true if successful, false otherwise
+ */
+bool ConvertTemperatureToResistanceDefault(float temperature_celsius,
+                                           float *resistance_ohms) noexcept;
+
+//--------------------------------------
+//  Voltage Divider Calculations
+//--------------------------------------
+
+/**
+ * @brief Calculate thermistor resistance from voltage divider
+ * @param voltage_thermistor Voltage across thermistor (V)
+ * @param reference_voltage Reference voltage (V)
+ * @param series_resistance Series resistance (ohms)
+ * @param resistance_ohms Pointer to store thermistor resistance (ohms)
+ * @return true if successful, false otherwise
+ */
+bool CalculateThermistorResistance(float voltage_thermistor,
+                                   float reference_voltage,
+                                   float series_resistance,
+                                   float *resistance_ohms) noexcept;
+
+/**
+ * @brief Calculate voltage across thermistor from resistance
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param reference_voltage Reference voltage (V)
+ * @param series_resistance Series resistance (ohms)
+ * @param voltage_thermistor Pointer to store voltage across thermistor (V)
+ * @return true if successful, false otherwise
+ */
+bool CalculateThermistorVoltage(float resistance_ohms, float reference_voltage,
+                                float series_resistance,
+                                float *voltage_thermistor) noexcept;
+
+/**
+ * @brief Calculate voltage divider ratio
+ * @param resistance_ohms Thermistor resistance (ohms)
+ * @param series_resistance Series resistance (ohms)
+ * @param ratio Pointer to store voltage ratio
+ * @return true if successful, false otherwise
+ */
+bool CalculateVoltageDividerRatio(float resistance_ohms,
+                                  float series_resistance,
+                                  float *ratio) noexcept;
+
+//--------------------------------------
+//  Validation Functions
+//--------------------------------------
+
+/**
+ * @brief Validate resistance value
+ * @param resistance_ohms Resistance value to validate
+ * @param min_resistance Minimum valid resistance
+ * @param max_resistance Maximum valid resistance
+ * @return true if valid, false otherwise
+ */
+bool ValidateResistance(float resistance_ohms, float min_resistance,
+                        float max_resistance) noexcept;
+
+/**
+ * @brief Validate temperature value
+ * @param temperature_celsius Temperature value to validate
+ * @param min_temperature Minimum valid temperature
+ * @param max_temperature Maximum valid temperature
+ * @return true if valid, false otherwise
+ */
+bool ValidateTemperature(float temperature_celsius, float min_temperature,
+                         float max_temperature) noexcept;
+
+/**
+ * @brief Validate voltage value
+ * @param voltage_volts Voltage value to validate
+ * @param min_voltage Minimum valid voltage
+ * @param max_voltage Maximum valid voltage
+ * @return true if valid, false otherwise
+ */
+bool ValidateVoltage(float voltage_volts, float min_voltage,
+                     float max_voltage) noexcept;
+
+/**
+ * @brief Validate beta value
+ * @param beta_value Beta value to validate
+ * @return true if valid, false otherwise
+ */
+bool ValidateBetaValue(float beta_value) noexcept;
+
+/**
+ * @brief Validate Steinhart-Hart coefficients
+ *
+ * Accepts finite coefficients with |A| <= 1e-2, 1e-4 <= B <= 1e-3 and
+ * |C| <= 1e-6, which covers NTC fits from about 1 kOhm to 1 MOhm (this part's
+ * C is 1.9e-7).
+ *
+ * @param coeff_a Coefficient A
+ * @param coeff_b Coefficient B
+ * @param coeff_c Coefficient C
+ * @return true if valid, false otherwise
+ */
+bool ValidateSteinhartHartCoefficients(float coeff_a, float coeff_b,
+                                       float coeff_c) noexcept;
+
+//--------------------------------------
+//  Utility Functions
+//--------------------------------------
+
+/**
+ * @brief Calculate beta value from two temperature-resistance pairs
+ * @param temp1_celsius First temperature (°C)
+ * @param resistance1_ohms First resistance (ohms)
+ * @param temp2_celsius Second temperature (°C)
+ * @param resistance2_ohms Second resistance (ohms)
+ * @param beta_value Pointer to store calculated beta value
+ * @return true if successful, false otherwise
+ */
+bool CalculateBetaValue(float temp1_celsius, float resistance1_ohms,
+                        float temp2_celsius, float resistance2_ohms,
+                        float *beta_value) noexcept;
+
+/**
+ * @brief Calculate Steinhart-Hart coefficients from three
+ * temperature-resistance pairs
+ *
+ * Solves 1/T = A + B*ln(R) + C*ln(R)^3 through the three points (in double
+ * precision), so the returned equation passes through all three. Pick points
+ * across the range you need, e.g. -40, 25 and 125 C from the datasheet table.
+ * @param temp1_celsius First temperature (°C)
+ * @param resistance1_ohms First resistance (ohms)
+ * @param temp2_celsius Second temperature (°C)
+ * @param resistance2_ohms Second resistance (ohms)
+ * @param temp3_celsius Third temperature (°C)
+ * @param resistance3_ohms Third resistance (ohms)
+ * @param coeff_a Pointer to store coefficient A
+ * @param coeff_b Pointer to store coefficient B
+ * @param coeff_c Pointer to store coefficient C
+ * @return true if successful, false otherwise
+ */
+bool CalculateSteinhartHartCoefficients(
+    float temp1_celsius, float resistance1_ohms, float temp2_celsius,
+    float resistance2_ohms, float temp3_celsius, float resistance3_ohms,
+    float *coeff_a, float *coeff_b, float *coeff_c) noexcept;
+
+/**
  * @brief Calculate temperature accuracy estimate
  * @param resistance_ohms Thermistor resistance (ohms)
  * @param resistance_tolerance Resistance tolerance (fraction)

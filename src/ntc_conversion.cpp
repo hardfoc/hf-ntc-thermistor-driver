@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2024-2025 HardFOC. All rights reserved.
  */
 #include "ntc_conversion.hpp"
+#include "ntc_types.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -462,6 +463,7 @@ bool CalculateSteinhartHartCoefficients(
 }
 
 bool CalculateTemperatureAccuracy(float resistance_ohms,
+                                  float resistance_at_25c, float beta_value,
                                   float resistance_tolerance,
                                   float beta_tolerance,
                                   float *accuracy_celsius) noexcept {
@@ -469,49 +471,49 @@ bool CalculateTemperatureAccuracy(float resistance_ohms,
     return false;
   }
 
-  if (!ValidateResistance(resistance_ohms, MIN_RESISTANCE_OHMS_,
-                          MAX_RESISTANCE_OHMS_)) {
-    return false;
-  }
-
   constexpr float kMinTolerance = 0.0F;
   constexpr float kMaxTolerance = 1.0F;
-  if (resistance_tolerance < kMinTolerance ||
-      resistance_tolerance > kMaxTolerance) {
+  if (!(resistance_tolerance >= kMinTolerance &&
+        resistance_tolerance <= kMaxTolerance) ||
+      !(beta_tolerance >= kMinTolerance && beta_tolerance <= kMaxTolerance)) {
     return false;
   }
 
-  if (beta_tolerance < kMinTolerance || beta_tolerance > kMaxTolerance) {
+  float temperature_celsius = 0.0F;
+  if (!ConvertResistanceToTemperatureBeta(resistance_ohms, resistance_at_25c,
+                                          beta_value, &temperature_celsius)) {
     return false;
   }
 
-  // Estimate temperature accuracy based on resistance and beta tolerances
-  // This is a simplified calculation - actual accuracy depends on many factors
-  constexpr float kTypicalBetaValue =
-      3435.0F; // Typical beta value for NTC thermistors
-  constexpr float kResistanceErrorDivisor =
-      100.0F;                                  // Rough approximation divisor
-  constexpr float kBetaErrorDivisor = 1000.0F; // Rough approximation divisor
-
-  const float resistance_error = resistance_ohms * resistance_tolerance;
-  const float beta_error = kTypicalBetaValue * beta_tolerance;
-
-  // Convert resistance error to temperature error (approximate)
-  const float temp_error_resistance =
-      resistance_error / kResistanceErrorDivisor;
-
-  // Convert beta error to temperature error (approximate)
-  const float temp_error_beta = beta_error / kBetaErrorDivisor;
-
-  *accuracy_celsius =
-      std::sqrt((temp_error_resistance * temp_error_resistance) +
-                (temp_error_beta * temp_error_beta));
+  // From 1/T = 1/T25 + ln(R/R25)/B:
+  //   dT/T = -(T/B) dR/R              (R25 error moves R/R25)
+  //   dT   = T (1 - T/T25) dB/B       (B error)
+  // Summed as a worst case, like the datasheet's Min/Max columns.
+  const float t_kelvin = temperature_celsius + KELVIN_OFFSET_;
+  const float t25_kelvin =
+      NTC::Constants::REFERENCE_TEMPERATURE_C_ + KELVIN_OFFSET_;
+  const float error_r = (t_kelvin * t_kelvin / beta_value) *
+                        resistance_tolerance;
+  const float error_b =
+      std::abs(t_kelvin * (ONE_FLOAT_ - (t_kelvin / t25_kelvin))) *
+      beta_tolerance;
+  *accuracy_celsius = error_r + error_b;
 
   return true;
 }
 
+bool CalculateTemperatureAccuracy(float resistance_ohms,
+                                  float resistance_tolerance,
+                                  float beta_tolerance,
+                                  float *accuracy_celsius) noexcept {
+  return CalculateTemperatureAccuracy(
+      resistance_ohms, NTC::DefaultConfig::DEFAULT_RESISTANCE_AT_25C_,
+      NTC::DefaultConfig::DEFAULT_BETA_VALUE_, resistance_tolerance,
+      beta_tolerance, accuracy_celsius);
+}
+
 bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
-                                      float min_temperature,
+                                      float beta_value, float min_temperature,
                                       float max_temperature,
                                       float *optimal_resistance) noexcept {
   if (optimal_resistance == nullptr) {
@@ -521,6 +523,10 @@ bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
   constexpr float kMinThermistorResistance = 100.0F;
   if (!ValidateResistance(thermistor_resistance_at_25c,
                           kMinThermistorResistance, MAX_RESISTANCE_OHMS_)) {
+    return false;
+  }
+
+  if (!ValidateBetaValue(beta_value)) {
     return false;
   }
 
@@ -539,9 +545,9 @@ bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
   float r_min = 0.0F;
   float r_max = 0.0F;
   if (!ConvertTemperatureToResistanceBeta(
-          min_temperature, thermistor_resistance_at_25c, 3435.0F, &r_min) ||
+          min_temperature, thermistor_resistance_at_25c, beta_value, &r_min) ||
       !ConvertTemperatureToResistanceBeta(
-          max_temperature, thermistor_resistance_at_25c, 3435.0F, &r_max)) {
+          max_temperature, thermistor_resistance_at_25c, beta_value, &r_max)) {
     return false;
   }
 
@@ -550,6 +556,15 @@ bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
   *optimal_resistance = std::sqrt(r_min * r_max);
 
   return true;
+}
+
+bool CalculateOptimalSeriesResistance(float thermistor_resistance_at_25c,
+                                      float min_temperature,
+                                      float max_temperature,
+                                      float *optimal_resistance) noexcept {
+  return CalculateOptimalSeriesResistance(
+      thermistor_resistance_at_25c, NTC::DefaultConfig::DEFAULT_BETA_VALUE_,
+      min_temperature, max_temperature, optimal_resistance);
 }
 
 } // namespace NTC

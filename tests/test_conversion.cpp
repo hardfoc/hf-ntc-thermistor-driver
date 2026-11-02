@@ -156,3 +156,37 @@ TEST_CASE("Steinhart-Hart validation accepts this part's fit and rejects nonsens
   CHECK(!NTC::ValidateSteinhartHartCoefficients(8.767633e-4F, -2.5e-4F, 1.9e-7F));
   CHECK(!NTC::ValidateSteinhartHartCoefficients(std::nanf(""), 2.5e-4F, 1.9e-7F));
 }
+
+TEST_CASE("Optimal series resistance uses the configured B, not 3435 K") {
+  // A 100 kOhm, B = 4250 K part from 0 C to 100 C.
+  ntc_config_t cfg = GetDefaultNtcConfig();
+  cfg.resistance_at_25c = 100000.0F;
+  cfg.beta_value = 4250.0F;
+  float r0 = 0.0F;
+  float r100 = 0.0F;
+  REQUIRE(NTC::ConvertTemperatureToResistanceBeta(0.0F, cfg.resistance_at_25c, cfg.beta_value, &r0));
+  REQUIRE(NTC::ConvertTemperatureToResistanceBeta(100.0F, cfg.resistance_at_25c, cfg.beta_value, &r100));
+  float rs = 0.0F;
+  REQUIRE(NTC::CalculateOptimalSeriesResistance(cfg.resistance_at_25c, cfg.beta_value, 0.0F, 100.0F, &rs));
+  CHECK_NEAR(rs, std::sqrt(r0 * r100), 1.0);
+  // This part (B25/85 = 3435 K) against the Table 3 rows at 0 C and 100 C: within the Beta model's own
+  // error there (it reads 1.1 C high at 0 C, about 3 % in R).
+  REQUIRE(NTC::CalculateOptimalSeriesResistance(10000.0F, 3435.0F, 0.0F, 100.0F, &rs));
+  CHECK_NEAR(rs, std::sqrt(rowOhms(0.0F) * rowOhms(100.0F)), 0.04 * rs);
+  CHECK(!NTC::CalculateOptimalSeriesResistance(10000.0F, 100.0F, 0.0F, 100.0F, &rs)); // B out of range
+}
+
+TEST_CASE("Temperature accuracy from R25 and B tolerances matches the datasheet Min/Max band") {
+  // Spec sheet Table 2: R25 +/- 1 %, B25/85 +/- 1 %. Table 3 Min/Max at 25 C and 85 C, converted to
+  // degrees with the local slope of the Nom column.
+  float acc = 0.0F;
+  REQUIRE(NTC::CalculateTemperatureAccuracy(10000.0F, 10000.0F, 3435.0F, 0.01F, 0.01F, &acc));
+  // 25 C: 9.90 .. 10.10 kOhm = +/- 1 %, slope -3.9 %/C -> 0.26 C
+  CHECK_NEAR(acc, 0.26, 0.05);
+  REQUIRE(NTC::CalculateTemperatureAccuracy(1451.0F, 10000.0F, 3435.0F, 0.01F, 0.01F, &acc));
+  // 85 C: 1.409 .. 1.494 kOhm = +/- 2.9 %, slope -2.7 %/C -> 1.1 C
+  CHECK_NEAR(acc, 1.08, 0.1);
+  REQUIRE(NTC::CalculateTemperatureAccuracy(188500.0F, 10000.0F, 3435.0F, 0.01F, 0.01F, &acc));
+  // -40 C: 181.2 .. 196.1 kOhm = +/- 3.9 %, slope -5.3 %/C (table) to -6.3 %/C (Beta) -> 0.6 .. 0.7 C
+  CHECK_NEAR(acc, 0.66, 0.1);
+}

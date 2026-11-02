@@ -42,6 +42,16 @@ code that used the affected API; together they call for a major version bump at 
 - `sample_delay_ms` was a busy-wait loop that the compiler could remove, so it waited an unknown time or none.
   The driver now waits through an optional `DelayMs(uint32_t ms)` hook on the ADC port, detected at compile
   time; a port without it takes the samples back to back. Existing ports compile unchanged.
+- `NTC::CalculateOptimalSeriesResistance()` and `NTC::CalculateTemperatureAccuracy()` used B = 3435 K whatever
+  the part. New overloads take R25 and B (from `ntc_config_t`); the accuracy estimate is now the worst-case
+  error from the R25 and B tolerances, which reproduces the spec sheet's Table 3 Min/Max band (0.26 °C at
+  25 °C, 1.1 °C at 85 °C) instead of a fixed-divisor approximation.
+
+### Deprecated
+
+- `NTC::CalculateOptimalSeriesResistance(r25, t_min, t_max, &r)` and
+  `NTC::CalculateTemperatureAccuracy(r, tol_r, tol_b, &acc)`: they assume the default part (R25 = 10 kΩ,
+  B = 3435 K). Use the overloads that take B (and R25).
 
 ### Added
 
