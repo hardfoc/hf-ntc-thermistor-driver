@@ -50,11 +50,12 @@ Rules for `ReadChannelV()`:
 
 ## Reference implementation
 
-The ESP32 example's port, [`mock_esp32_adc.hpp`](../examples/esp32/main/mock_esp32_adc.hpp), is a simulated
-ADC: it returns a fixed mid-scale count and does not touch the hardware. It shows the shape of a port, not an
-ESP-IDF ADC driver. On ESP-IDF, implement `EnsureInitialized()` with `adc_oneshot_new_unit()`,
-`adc_oneshot_config_channel()` and an `adc_cali` scheme, and `ReadChannelV()` with `adc_oneshot_read()` and
-`adc_cali_raw_to_voltage()`.
+The ESP32 example's port, [`esp32_ntc_adc.hpp`](../examples/esp32/main/esp32_ntc_adc.hpp), is a complete
+ESP-IDF port. `EnsureInitialized()` creates the ADC1 unit with `adc_oneshot_new_unit()`, configures the channel
+at 12 dB attenuation (about 0 V to 3.3 V, the whole divider) with `adc_oneshot_config_channel()` and creates an
+`adc_cali` curve-fitting scheme (line fitting on chips without it). `ReadChannelV()` reads with
+`adc_oneshot_read()` and converts with `adc_cali_raw_to_voltage()`. `DelayMs()` sleeps with `vTaskDelay()`.
+Its component needs `REQUIRES esp_adc`.
 
 ## Check your port
 

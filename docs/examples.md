@@ -1,18 +1,20 @@
 # Examples
 
-An ESP32-C6 test application that exercises the driver's initialisation, built by CI on every pull request.
+An ESP32-C6 test application that runs the driver on the chip's ADC, built by CI on every pull request.
 
-The application runs on an ESP32-C6 DevKit. Its ADC port,
-[`mock_esp32_adc.hpp`](../examples/esp32/main/mock_esp32_adc.hpp), is simulated: it returns a fixed mid-scale
-reading and does not read a pin, so the app checks the driver's logic, not a thermistor. The divider and ADC
-values it uses are in [`esp32_ntc_test_config.hpp`](../examples/esp32/main/esp32_ntc_test_config.hpp).
+The application runs on an ESP32-C6 DevKit with the divider of [Hardware](hardware.md) on GPIO0 (ADC1
+channel 0). Its ADC port, [`esp32_ntc_adc.hpp`](../examples/esp32/main/esp32_ntc_adc.hpp), reads the pin with
+the ESP-IDF `adc_oneshot` driver and returns the voltage calibrated by `adc_cali`; it also gives the driver a
+`DelayMs()` for `sample_delay_ms`. The app initialises the driver, reads the temperature, and checks the lookup
+table against the Steinhart-Hart fit on the same reading. The divider and ADC values are in
+[`esp32_ntc_test_config.hpp`](../examples/esp32/main/esp32_ntc_test_config.hpp).
 
 ## The apps
 
 <!-- generated: examples -->
 | App | What it shows | Source | CI |
 | --- | --- | --- | --- |
-| `ntc_thermistor_comprehensive_test` :material-star:{ title="featured" } | Driver initialisation test over a simulated ADC, with a pass / fail summary | [`ntc_thermistor_comprehensive_test.cpp`](../examples/esp32/main/ntc_thermistor_comprehensive_test.cpp) | yes |
+| `ntc_thermistor_comprehensive_test` :material-star:{ title="featured" } | Driver test on the real ESP32-C6 ADC (adc_oneshot + adc_cali), with a pass / fail summary | [`ntc_thermistor_comprehensive_test.cpp`](../examples/esp32/main/ntc_thermistor_comprehensive_test.cpp) | yes |
 
 Build and flash one (from `examples/esp32`, ESP-IDF environment loaded):
 
@@ -40,9 +42,9 @@ from) and build each app as its own firmware image.
 
 | You want to | Read |
 | --- | --- |
-| See the shape of an ADC port | `mock_esp32_adc.hpp` |
+| Write an ESP-IDF ADC port | `esp32_ntc_adc.hpp` |
 | Build a configuration from constants | `init_test_resources()` in `ntc_thermistor_comprehensive_test.cpp` |
 | Run tests in FreeRTOS tasks with a pass / fail summary | `TestFramework.h` |
 
-For a port that reads a real ESP32 ADC, see [Porting](porting.md#reference-implementation). The
+[Porting](porting.md#reference-implementation) explains the port. The
 [example folder's README](../examples/esp32/README.md) has the build commands, the test setup and the expected results.

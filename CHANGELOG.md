@@ -50,6 +50,11 @@ code that used the affected API; together they call for a major version bump at 
 - `GetNtcThermistorDriverVersion()` returned an empty string: the build settings never set
   `HF_NTC_THERMISTOR_VERSION_STRING`, which `ntc_thermistor_version.h.in` uses. It now returns "1.0.0".
 
+- The ESP32 example used a simulated ADC that returned a fixed mid-scale count, and B = 3950 K. It now reads
+  the ESP32-C6 ADC through `examples/esp32/main/esp32_ntc_adc.hpp` (`adc_oneshot` with `adc_cali` calibration
+  and a `DelayMs()` hook), configures the NTCG163JF103FT1S (B25/85 = 3435 K) with the lookup table, and tests
+  a real reading. `mock_esp32_adc.hpp` is removed.
+
 ### Deprecated
 
 - `NTC::CalculateOptimalSeriesResistance(r25, t_min, t_max, &r)` and

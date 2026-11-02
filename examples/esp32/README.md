@@ -68,15 +68,14 @@ The NTC thermistor is connected in a voltage divider configuration:
 
 ## Test Setup
 
-### Mock ADC Testing
+### ADC port
 
-The comprehensive test suite uses a **Mock ADC** implementation that simulates ADC readings without requiring actual hardware. This allows for:
+The test app reads the thermistor divider through `main/esp32_ntc_adc.hpp`, a port over the ESP-IDF
+`adc_oneshot` driver with `adc_cali` calibration (ADC1 channel 0 = GPIO0 at 12 dB by default; see
+`main/esp32_ntc_test_config.hpp`). It needs the divider below wired to the board: with nothing on the pin the
+read test fails with a conversion or range error.
 
-- **Unit Testing**: Test driver logic without hardware
-- **CI/CD Integration**: Run tests in automated pipelines
-- **Rapid Development**: Iterate quickly without physical setup
-
-### Hardware Testing (Optional)
+### Hardware
 
 For hardware testing with a real NTC thermistor:
 
@@ -186,27 +185,14 @@ GPIO14 toggles between HIGH/LOW for each completed test, providing visual feedba
 
 ### Basic Tests
 
-The comprehensive test suite includes:
+The comprehensive test suite runs three tests on the board:
 
-1. **Initialization Tests**:
-   - Driver initialization
-   - Configuration validation
-   - ADC interface verification
-
-2. **Temperature Reading Tests**:
-   - Celsius, Fahrenheit, and Kelvin readings
-   - Complete reading structure validation
-   - Error handling verification
-
-3. **Configuration Tests**:
-   - Configuration setting/getting
-   - Conversion method selection
-   - Filtering configuration
-
-4. **Calibration Tests**:
-   - Calibration offset
-   - Calibration reset
-   - Calibration persistence
+1. **basic_initialization**: `Initialize()` creates the ADC1 oneshot unit and the calibration scheme and
+   accepts the configured channel.
+2. **read_temperature**: `ReadTemperature()` on the real divider; logs the node voltage, raw count,
+   thermistor resistance and temperature. Fails on an ADC error or an open or shorted thermistor.
+3. **lookup_matches_steinhart_hart**: the driver's lookup-table reading and
+   `NTC::ConvertResistanceToTemperatureDefault()` agree within 0.5 °C on the same sensor.
 
 #### Test Results
 
@@ -221,38 +207,32 @@ The test framework provides:
 
 ## Configuration
 
-### Mock ADC Configuration
+### ADC port
 
-Default mock ADC configuration (in test file):
+`main/esp32_ntc_adc.hpp` (class `Esp32NtcAdc`) reads one ADC1 channel at 12 dB attenuation with
+`adc_oneshot_read()` and returns the voltage from `adc_cali_raw_to_voltage()`. Its `DelayMs()` gives the driver a
+real wait for `sample_delay_ms`.
 
 ```cpp
-MockEsp32Adc mock_adc(3.3f, 12);  // 3.3V reference, 12-bit resolution
+Esp32NtcAdc adc(0);                                   // ADC1 channel 0 = GPIO0 on the ESP32-C6
 ```
 
-### NTC Configuration
+### NTC configuration
 
-Default NTC configuration (in test file):
-
-```cpp
-NtcThermistor<MockEsp32Adc> thermistor(
-    NTC_TYPE_NTCG163JFT103FT1S,  // NTC type
-    &mock_adc                    // ADC interface
-);
-```
-
-### Custom Configuration
-
-For custom NTC setups:
+`init_test_resources()` builds the configuration from `main/esp32_ntc_test_config.hpp`: the TDK
+NTCG163JF103FT1S (R25 = 10 kΩ, B25/85 = 3435 K), a 10 kΩ series resistor on 3.3 V, the lookup-table
+method, and 16 samples 5 ms apart.
 
 ```cpp
-ntc_config_t config = NTC_CONFIG_DEFAULT_NTCG163JFT103FT1S();
-config.adc_channel = 0;                              // ADC channel
-config.series_resistance = 10000.0f;                 // 10kΩ series resistor
-config.conversion_method = NTC_CONVERSION_MATHEMATICAL; // Conversion method
-config.enable_filtering = true;                      // Enable filtering
-config.filter_alpha = 0.1f;                          // Filter coefficient
+ntc_config_t config = GetDefaultNtcConfig();
+config.type = NtcType::NtcG163Jf103Ft1S;
+config.adc_channel = 0;
+config.series_resistance = 10000.0F;
+config.conversion_method = NtcConversionMethod::LookupTable;
+config.sample_count = 16;
+config.sample_delay_ms = 5;
 
-NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
+NtcThermistor<Esp32NtcAdc> thermistor(config, &adc);
 ```
 
 ---
@@ -285,9 +265,9 @@ NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
 **Symptoms**: Specific tests fail
 
 **Solutions**:
-1. **Check mock ADC configuration**:
-   - Verify reference voltage matches expected values
-   - Check ADC resolution settings
+1. **Check the divider on the ADC pin**:
+   - `read_temperature` logs the node voltage: about 1.65 V at 25 °C
+   - 0 V or 3.3 V means a shorted or open thermistor
 
 2. **Review test logs**:
    - Check which specific test failed
@@ -323,7 +303,7 @@ NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
 
 - [NTC Driver Documentation](../../README.md) - Complete driver documentation
 - [API Reference](../../docs/) - Detailed API documentation
-- [Datasheets](../../docs/datasheet/) - NTC thermistor datasheets
+- [NTCG163JF103FT1S spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S) - TDK
 
 ---
 
@@ -360,10 +340,10 @@ GPIO14 toggles between HIGH/LOW for each completed test, providing visual feedba
 
 ## Notes
 
-- **Mock ADC**: Tests use mock ADC for hardware-independent testing
-- **Hardware Testing**: Optional - connect real NTC thermistor for hardware validation
+- **Real ADC**: The app reads the ESP32-C6 ADC; wire the divider before running it
+- **CI**: CI builds the app for every pull request but does not run it
 - **Test Duration**: Comprehensive test suite takes approximately 1-2 minutes to complete
-- **Hardware Requirements**: Basic tests work with mock ADC; hardware tests require NTC thermistor circuit
+- **Hardware Requirements**: An NTC thermistor divider on the configured ADC1 channel
 
 ---
 

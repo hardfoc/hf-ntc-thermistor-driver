@@ -45,5 +45,6 @@ The workflows call the shared, versioned workflows of
 
 ## On hardware
 
-The [ESP32 example](examples.md) runs over a simulated ADC. To check a real board, follow
-[Porting](porting.md#check-your-port): a precision resistor in place of the thermistor gives a known 25 °C.
+The [ESP32 example](examples.md) runs on the ESP32-C6's ADC; CI builds it but does not run it. To check a
+board, follow [Porting](porting.md#check-your-port): a precision resistor in place of the thermistor gives a
+known 25 °C.
