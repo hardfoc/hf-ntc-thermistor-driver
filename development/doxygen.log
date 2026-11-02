@@ -1,5 +1,5 @@
-warning: ignoring unsupported tag 'PAGE_OUTLINE_PANEL' at line 1763, file /tmp/doxyfile.docJ3D
-warning: Tag 'DOT_TRANSPARENT' at line 2786 of file '/tmp/doxyfile.docJ3D' has become obsolete.
+warning: ignoring unsupported tag 'PAGE_OUTLINE_PANEL' at line 1763, file /tmp/doxyfile.XtoEOZ
+warning: Tag 'DOT_TRANSPARENT' at line 2786 of file '/tmp/doxyfile.XtoEOZ' has become obsolete.
          To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
 /home/runner/work/hf-ntc-thermistor-driver/hf-ntc-thermistor-driver/inc/ntc_thermistor.hpp:62: warning: included file 'Basic' is not found. Check your EXAMPLE_PATH
 /home/runner/work/hf-ntc-thermistor-driver/hf-ntc-thermistor-driver/inc/ntc_thermistor.hpp:75: warning: included file 'Custom' is not found. Check your EXAMPLE_PATH
