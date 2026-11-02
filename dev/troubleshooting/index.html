@@ -1453,7 +1453,7 @@ if not, see the next section. A part near a hot spot may be right.</p>
 <tr>
 <td>Beta error far from 25 °C to 85 °C</td>
 <td>The error grows with distance: +4.4 °C at −40 °C for this part</td>
-<td>Steinhart-Hart or a calibration offset (<a href="../conversion/">Conversion methods</a>)</td>
+<td><code>LookupTable</code> for the TDK types, Steinhart-Hart or a calibration offset (<a href="../conversion/">Conversion methods</a>)</td>
 </tr>
 <tr>
 <td>Wrong B for the part</td>
@@ -1464,11 +1464,6 @@ if not, see the next section. A part near a hot spot may be right.</p>
 <td>Self-heating</td>
 <td>Reading drops when you lower the divider current</td>
 <td>Larger resistors, or power the divider only while sampling (<a href="../hardware/#self-heating">Hardware</a>)</td>
-</tr>
-<tr>
-<td><code>LookupTable</code> method</td>
-<td>The setting in <code>conversion_method</code></td>
-<td>Use <code>Auto</code> (<a href="../conversion/#lookup-table">Conversion methods</a>)</td>
 </tr>
 </tbody>
 </table>
@@ -1503,8 +1498,9 @@ parts, or return V<sub>REF</sub> − V<sub>NODE</sub> from the port (<a href="..
 </tbody>
 </table>
 <h2 id="calibration-made-it-worse">Calibration made it worse<a class="headerlink" href="#calibration-made-it-worse" title="Permanent link">&para;</a></h2>
-<p><code>Calibrate()</code> measures with the current offset applied and replaces it. Call <code>ResetCalibration()</code> before
-<code>Calibrate()</code>, and calibrate at the temperature you care about most.</p>
+<p><code>Calibrate()</code> corrects the reading at one temperature only: the offset is a constant, so the Beta equation's
+error elsewhere remains (<a href="../conversion/">Conversion methods</a>). Calibrate at the temperature you care about most,
+with the sensor settled at the reference, and use <code>LookupTable</code> or Steinhart-Hart for a wide range.</p>
 
 
 

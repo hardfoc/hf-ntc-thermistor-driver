@@ -1307,21 +1307,25 @@ are injected.</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/test_driver.cpp"><code>tests/test_driver.cpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/test_driver.cpp"><code>tests/test_driver.cpp</code></a></td>
 <td>Initialisation, Beta accuracy against the table, errors, averaging, open and short, range, calibration, filter, free functions</td>
 </tr>
 <tr>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/mock_adc.hpp"><code>tests/mock_adc.hpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/test_conversion.cpp"><code>tests/test_conversion.cpp</code></a></td>
+<td>The lookup table and the Steinhart-Hart helpers against every row of the datasheet table</td>
+</tr>
+<tr>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/mock_adc.hpp"><code>tests/mock_adc.hpp</code></a></td>
 <td>The ADC and divider model</td>
 </tr>
 <tr>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/test_harness.hpp"><code>tests/test_harness.hpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/test_harness.hpp"><code>tests/test_harness.hpp</code></a></td>
 <td>A small test registry and check macros</td>
 </tr>
 </tbody>
 </table>
 <h2 id="documentation-snippets">Documentation snippets<a class="headerlink" href="#documentation-snippets" title="Permanent link">&para;</a></h2>
-<p>Every C++ block on this site is included from <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/docs/my_adc.hpp"><code>tests/docs/</code></a>, which the host build
+<p>Every C++ block on this site is included from <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/docs/my_adc.hpp"><code>tests/docs/</code></a>, which the host build
 compiles (target <code>hf_ntc_thermistor_doc_snippets</code>) with the driver instantiated over the documented port. A
 change to the API that breaks a page breaks the build first.</p>
 <h2 id="ci-workflows">CI workflows<a class="headerlink" href="#ci-workflows" title="Permanent link">&para;</a></h2>
@@ -1359,8 +1363,9 @@ change to the API that breaks a page breaks the build first.</p>
 <a href="https://github.com/hardfoc/hf-general-ci-tools">hf-general-ci-tools</a> and
 <a href="https://github.com/hardfoc/hf-espidf-ci-tools">hf-espidf-ci-tools</a>.</p>
 <h2 id="on-hardware">On hardware<a class="headerlink" href="#on-hardware" title="Permanent link">&para;</a></h2>
-<p>The <a href="../examples/">ESP32 example</a> runs over a simulated ADC. To check a real board, follow
-<a href="../porting/#check-your-port">Porting</a>: a precision resistor in place of the thermistor gives a known 25 °C.</p>
+<p>The <a href="../examples/">ESP32 example</a> runs on the ESP32-C6's ADC; CI builds it but does not run it. To check a
+board, follow <a href="../porting/#check-your-port">Porting</a>: a precision resistor in place of the thermistor gives a
+known 25 °C.</p>
 
 
 

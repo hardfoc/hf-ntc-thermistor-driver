@@ -1388,12 +1388,13 @@ and B. Change any field before construction, or with <code>SetConfiguration()</c
 <dt><code>series_resistance</code></dt>
 <dd>The fixed resistor between the supply and the ADC node, in ohms.</dd>
 <dt><code>conversion_method</code></dt>
-<dd><code>Auto</code> and <code>Mathematical</code> use the Beta equation. <code>LookupTable</code> tries the type's table first and falls back
-to Beta; the shipped table is not usable yet (<a href="../conversion/#lookup-table">Conversion methods</a>).</dd>
+<dd><code>Auto</code> and <code>Mathematical</code> use the Beta equation. <code>LookupTable</code> uses the type's datasheet table from −40 °C
+to +150 °C and falls back to Beta outside it (<a href="../conversion/#lookup-table">Conversion methods</a>).</dd>
 <dt><code>adc_channel</code></dt>
 <dd>The channel number passed to your port. <code>SetAdcChannel()</code> asks the port's <code>IsChannelAvailable()</code> first.</dd>
 <dt><code>sample_count</code>, <code>sample_delay_ms</code></dt>
-<dd>Reads averaged per conversion, and a busy-wait between them (<a href="../api-guide/#smooth">API guide</a>).</dd>
+<dd>Reads averaged per conversion, and the wait between them through the port's optional <code>DelayMs()</code>
+(<a href="../api-guide/#smooth">API guide</a>).</dd>
 <dt><code>min_temperature</code>, <code>max_temperature</code></dt>
 <dd>A reading outside this window returns <code>TemperatureOutOfRange</code>. Set it to what is physically possible for
 your sensor, so a broken divider shows up as an error.</dd>

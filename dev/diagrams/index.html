@@ -1177,13 +1177,13 @@ committed figure no longer matches the code. Each figure below lists the files i
 <details class="hf-figure-desc">
 <summary>Figure description and sources</summary>
 <p>From top to bottom. Your application talks to one NtcThermistor<AdcType> object, whose public calls (listed from inc/ntc_thermistor.hpp) read the temperature, the resistance and the voltage, and set the divider, the sampling, the filter and the calibration. The core turns a node voltage into the thermistor's resistance and the resistance into a temperature with the Beta equation or a lookup table (inc/ntc_conversion.hpp). The ADC interface (AdcInterface in inc/ntc_adc_interface.hpp) is a CRTP base that forwards to your class. The platform port is the only code you write: a class that brings the ADC up and returns a channel's voltage and count. Below it is the hardware: the divider and the thermistor.</p>
-<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
+<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
 </details>
-<p>Figure module: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a></p>
+<p>Figure module: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a></p>
 <p>Drawn from:</p>
 <ul>
-<li><code>NtcThermistor public calls</code> in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a></li>
-<li><code>AdcInterface</code> in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a></li>
+<li><code>NtcThermistor public calls</code> in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a></li>
+<li><code>AdcInterface</code> in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a></li>
 </ul>
 
 

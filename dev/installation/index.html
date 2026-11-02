@@ -663,6 +663,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#install-and-find_package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install and find_package()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1295,6 +1306,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#install-and-find_package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install and find_package()
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1375,7 +1397,7 @@ carries the include directories and requires C++20 (<code>cxx_std_20</code>), so
 </table>
 <h2 id="esp-idf">ESP-IDF<a class="headerlink" href="#esp-idf" title="Permanent link">&para;</a></h2>
 <p>The ESP-IDF component wrapper is
-<a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt"><code>examples/esp32/components/hf_ntc_thermistor/</code></a>.
+<a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt"><code>examples/esp32/components/hf_ntc_thermistor/</code></a>.
 Copy that folder into your project's <code>components/</code> (or point <code>EXTRA_COMPONENT_DIRS</code> at it) and set the
 <code>HF_NTC_THERMISTOR_ROOT</code> cache variable to the driver checkout; the wrapper stops with a clear message when the
 path is wrong. Your component then declares <code>REQUIRES hf_ntc_thermistor</code>.</p>
@@ -1391,17 +1413,17 @@ path is wrong. Your component then declares <code>REQUIRES hf_ntc_thermistor</co
 <tbody>
 <tr>
 <td>Settings</td>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/cmake/hf_ntc_thermistor_build_settings.cmake"><code>cmake/hf_ntc_thermistor_build_settings.cmake</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/cmake/hf_ntc_thermistor_build_settings.cmake"><code>cmake/hf_ntc_thermistor_build_settings.cmake</code></a></td>
 <td>Sources, include directories, version: the single source of truth</td>
 </tr>
 <tr>
 <td>Library</td>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/CMakeLists.txt"><code>CMakeLists.txt</code></a></td>
-<td>Static library for host builds and CI</td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/CMakeLists.txt"><code>CMakeLists.txt</code></a></td>
+<td>Static library, <code>install()</code> rules and the CMake package</td>
 </tr>
 <tr>
 <td>ESP-IDF</td>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt"><code>examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt"><code>examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt</code></a></td>
 <td>IDF component wrapper over the same settings</td>
 </tr>
 </tbody>
@@ -1410,8 +1432,18 @@ path is wrong. Your component then declares <code>REQUIRES hf_ntc_thermistor</co
 Read it at run time:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetNtcThermistorDriverVersion</span><span class="p">();</span><span class="w">   </span><span class="c1">// "1.0.0"</span>
 </span></code></pre></div>
-<p>The root <code>CMakeLists.txt</code> writes a package configuration but has no <code>install()</code> rules yet: use the driver with
-<code>add_subdirectory()</code> or the ESP-IDF component, not <code>find_package()</code>.</p>
+<h2 id="install-and-find_package">Install and <code>find_package()</code><a class="headerlink" href="#install-and-find_package" title="Permanent link">&para;</a></h2>
+<p>The root <code>CMakeLists.txt</code> installs the library, the headers (with <code>src/ntc_thermistor.ipp</code>, which
+<code>ntc_thermistor.hpp</code> includes), the generated version header and a CMake package:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cmake<span class="w"> </span>-S<span class="w"> </span>.<span class="w"> </span>-B<span class="w"> </span>build<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>cmake<span class="w"> </span>--build<span class="w"> </span>build
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>cmake<span class="w"> </span>--install<span class="w"> </span>build<span class="w"> </span>--prefix<span class="w"> </span>/opt/hardfoc
+</span></code></pre></div>
+<div class="language-cmake highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">find_package</span><span class="p">(</span><span class="s">hf_ntc_thermistor</span><span class="w"> </span><span class="s">1.0</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span><span class="w">   </span><span class="c"># with /opt/hardfoc in CMAKE_PREFIX_PATH</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">hf::ntc_thermistor</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>hf::ntc_thermistor</code> is also defined as an alias by <code>add_subdirectory()</code>, so the same <code>target_link_libraries()</code>
+line works both ways. Headers install under <code>include/hf_ntc_thermistor/inc/</code>.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <p><a href="../quickstart/">Quickstart</a> wires a divider and reads a temperature; <a href="../porting/">Porting</a> writes the ADC
 interface for your MCU.</p>

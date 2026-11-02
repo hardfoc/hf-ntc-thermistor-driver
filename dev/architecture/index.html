@@ -1318,7 +1318,7 @@
 <details class="hf-figure-desc">
 <summary>Figure description and sources</summary>
 <p>From top to bottom. Your application talks to one NtcThermistor<AdcType> object, whose public calls (listed from inc/ntc_thermistor.hpp) read the temperature, the resistance and the voltage, and set the divider, the sampling, the filter and the calibration. The core turns a node voltage into the thermistor's resistance and the resistance into a temperature with the Beta equation or a lookup table (inc/ntc_conversion.hpp). The ADC interface (AdcInterface in inc/ntc_adc_interface.hpp) is a CRTP base that forwards to your class. The platform port is the only code you write: a class that brings the ADC up and returns a channel's voltage and count. Below it is the hardware: the divider and the thermistor.</p>
-<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
+<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
 </details>
 <h2 id="the-three-layers">The three layers<a class="headerlink" href="#the-three-layers" title="Permanent link">&para;</a></h2>
 <table>
@@ -1332,12 +1332,12 @@
 <tbody>
 <tr>
 <td><strong>Core</strong>: <code>NtcThermistor&lt;AdcType&gt;</code>, conversions</td>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a>, <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/src/ntc_thermistor.ipp"><code>src/</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a>, <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/src/ntc_thermistor.ipp"><code>src/</code></a></td>
 <td>Never, for a new board</td>
 </tr>
 <tr>
 <td><strong>ADC interface</strong>: <code>ntc::AdcInterface&lt;Derived&gt;</code></td>
-<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a></td>
 <td>Never</td>
 </tr>
 <tr>
@@ -1432,7 +1432,7 @@ virtual destructor, so each driver object carries one vtable pointer.</p>
 </tr>
 <tr>
 <td><code>inc/ntc_lookup_table.hpp</code>, <code>src/ntc_lookup_table.cpp</code></td>
-<td>Lookup tables and search (<a href="../conversion/#lookup-table">status</a>)</td>
+<td>Lookup tables and search (<a href="../conversion/#lookup-table">details</a>)</td>
 </tr>
 <tr>
 <td><code>tests/</code></td>

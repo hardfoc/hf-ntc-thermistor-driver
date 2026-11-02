@@ -1355,7 +1355,7 @@
 <h1 id="api-guide">API guide<a class="headerlink" href="#api-guide" title="Permanent link">&para;</a></h1>
 <p>How to do the common jobs with the driver: configure, read, smooth, calibrate and handle errors.</p>
 <p>Every snippet on this page is compiled by the host CI from
-<a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/docs/api_tasks.cpp"><code>tests/docs/api_tasks.cpp</code></a>, with <code>Ntc</code> standing for <code>NtcThermistor&lt;MyAdc&gt;</code> and
+<a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/docs/api_tasks.cpp"><code>tests/docs/api_tasks.cpp</code></a>, with <code>Ntc</code> standing for <code>NtcThermistor&lt;MyAdc&gt;</code> and
 <code>MyAdc</code> the port from <a href="../porting/">Porting</a>. The <a href="../api-reference/">API reference</a> lists every member.</p>
 <h2 id="the-shape-of-the-api">The shape of the API<a class="headerlink" href="#the-shape-of-the-api" title="Permanent link">&para;</a></h2>
 <p>One <code>NtcThermistor&lt;AdcType&gt;</code> object per thermistor, holding an <code>ntc_config_t</code> and a pointer to your ADC port.
@@ -1465,8 +1465,8 @@ samples. <code>timestamp_us</code> is always 0 and <code>accuracy_celsius</code>
 </tr>
 <tr>
 <td><code>sample_delay_ms</code></td>
-<td>A busy-wait loop between samples, not a timed delay</td>
-<td>CPU time, length depends on the MCU</td>
+<td>A wait between samples through the port's <code>DelayMs()</code> (<a href="../porting/#what-you-implement">Porting</a>); none if the port has no <code>DelayMs()</code></td>
+<td>The call blocks <code>(sample_count − 1) × sample_delay_ms</code></td>
 </tr>
 <tr>
 <td><code>enable_filtering</code>, <code>filter_alpha</code></td>
@@ -1475,7 +1475,8 @@ samples. <code>timestamp_us</code> is always 0 and <code>accuracy_celsius</code>
 </tr>
 </tbody>
 </table>
-<p>Prefer <code>sample_delay_ms = 0</code> and space your calls with your RTOS. A smaller α smooths more and responds more
+<p><code>sample_delay_ms</code> blocks the calling task for the whole wait; leave it 0 unless the samples must be spread
+out, and give the port a <code>DelayMs()</code> that sleeps rather than spins. A smaller α smooths more and responds more
 slowly; changing the filter or the configuration resets it.</p>
 <h2 id="calibrate">Calibrate<a class="headerlink" href="#calibrate" title="Permanent link">&para;</a></h2>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// With the sensor at a known temperature (a reference thermometer reads 23.4 C):</span>
@@ -1486,8 +1487,9 @@ slowly; changing the filter or the configuration resets it.</p>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">printf</span><span class="p">(</span><span class="s">"offset %.2f C</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">);</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><code>Calibrate(t)</code> reads the sensor and sets the offset to <code>t − reading</code>. The reading already includes the current
-offset, so call <code>ResetCalibration()</code> first, as above. The offset is a constant: it corrects R25 tolerance and
+<p><code>Calibrate(t)</code> reads the sensor, with the current offset applied, and adds <code>t − reading</code> to the offset, so the
+sensor then reads <code>t</code> whatever offset was set before. <code>ResetCalibration()</code> first is optional; it starts from
+zero, as above. The offset is a constant: it corrects R25 tolerance and
 divider errors well, and the Beta equation's error only near the calibration temperature
 (<a href="../conversion/">Conversion methods</a>). The offset lives in RAM; store it yourself.</p>
 <h2 id="handle-errors">Handle errors<a class="headerlink" href="#handle-errors" title="Permanent link">&para;</a></h2>

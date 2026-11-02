@@ -1310,8 +1310,8 @@
 
 <h1 id="porting">Porting<a class="headerlink" href="#porting" title="Permanent link">&para;</a></h1>
 <p>Run the driver on a new MCU by writing one class: the ADC interface.</p>
-<p>The driver never calls your SDK directly. It calls seven methods on a class you derive from
-<code>ntc::AdcInterface&lt;Self&gt;</code> (in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a>). The base class uses
+<p>The driver never calls your SDK directly. It calls seven methods, plus one optional hook, on a class you derive from
+<code>ntc::AdcInterface&lt;Self&gt;</code> (in <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a>). The base class uses
 CRTP: the calls are resolved at compile time, so there are no virtual functions, no vtable and nothing to
 allocate.</p>
 <figure class="hf-figure">
@@ -1322,7 +1322,7 @@ allocate.</p>
 <details class="hf-figure-desc">
 <summary>Figure description and sources</summary>
 <p>From top to bottom. Your application talks to one NtcThermistor<AdcType> object, whose public calls (listed from inc/ntc_thermistor.hpp) read the temperature, the resistance and the voltage, and set the divider, the sampling, the filter and the calibration. The core turns a node voltage into the thermistor's resistance and the resistance into a temperature with the Beta equation or a lookup table (inc/ntc_conversion.hpp). The ADC interface (AdcInterface in inc/ntc_adc_interface.hpp) is a CRTP base that forwards to your class. The platform port is the only code you write: a class that brings the ADC up and returns a channel's voltage and count. Below it is the hardware: the divider and the thermistor.</p>
-<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
+<p>Drawn from: <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_thermistor.hpp"><code>inc/ntc_thermistor.hpp</code></a> <code>NtcThermistor public calls</code>; <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/inc/ntc_adc_interface.hpp"><code>inc/ntc_adc_interface.hpp</code></a> <code>AdcInterface</code>; figure module <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
 </details>
 <h2 id="what-you-implement">What you implement<a class="headerlink" href="#what-you-implement" title="Permanent link">&para;</a></h2>
 <table>
@@ -1360,6 +1360,10 @@ allocate.</p>
 <tr>
 <td><code>GetResolutionBits() const</code></td>
 <td>The ADC's resolution. Not used by the driver today</td>
+</tr>
+<tr>
+<td><code>DelayMs(ms)</code> (optional)</td>
+<td>Wait at least <code>ms</code> milliseconds (an RTOS sleep). Used between averaged samples when <code>sample_delay_ms</code> is set; without it the samples are taken back to back</td>
 </tr>
 </tbody>
 </table>
@@ -1403,22 +1407,25 @@ allocate.</p>
 </span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span><span class="p">[[</span><span class="na">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">GetReferenceVoltage</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">kFullScaleV</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span><span class="p">[[</span><span class="na">nodiscard</span><span class="p">]]</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">GetResolutionBits</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">kBits</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="k">private</span><span class="o">:</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="w"> </span><span class="n">read</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="o">*</span><span class="w"> </span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="o">*</span><span class="w"> </span><span class="n">mv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ready_</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">NotInitialized</span><span class="p">;</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">IsChannelAvailable</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">InvalidChannel</span><span class="p">;</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">  </span><span class="c1">// Optional: the driver waits sample_delay_ms between averaged samples through this.</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">DelayMs</span><span class="p">(</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ms</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">platform_delay_ms</span><span class="p">(</span><span class="n">ms</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="k">private</span><span class="o">:</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">  </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="w"> </span><span class="n">read</span><span class="p">(</span><span class="kt">uint8_t</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="o">*</span><span class="w"> </span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="o">*</span><span class="w"> </span><span class="n">mv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">ready_</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">NotInitialized</span><span class="p">;</span>
 </span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">platform_adc_read</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">mv</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">ReadFailed</span><span class="p">;</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">IsChannelAvailable</span><span class="p">(</span><span class="n">channel</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">InvalidChannel</span><span class="p">;</span>
 </span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">Success</span><span class="p">;</span>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>
-</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">ready_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="p">};</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">platform_adc_read</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">mv</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">ReadFailed</span><span class="p">;</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="o">::</span><span class="n">AdcError</span><span class="o">::</span><span class="n">Success</span><span class="p">;</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">ready_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a><span class="p">};</span>
 </span></code></pre></div>
 <p>Rules for <code>ReadChannelV()</code>:</p>
 <ul>
@@ -1430,15 +1437,16 @@ allocate.</p>
   over −40 °C to +150 °C; pick the attenuation or gain that covers it.</li>
 </ul>
 <h2 id="reference-implementation">Reference implementation<a class="headerlink" href="#reference-implementation" title="Permanent link">&para;</a></h2>
-<p>The ESP32 example's port, <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/examples/esp32/main/mock_esp32_adc.hpp"><code>mock_esp32_adc.hpp</code></a>, is a simulated
-ADC: it returns a fixed mid-scale count and does not touch the hardware. It shows the shape of a port, not an
-ESP-IDF ADC driver. On ESP-IDF, implement <code>EnsureInitialized()</code> with <code>adc_oneshot_new_unit()</code>,
-<code>adc_oneshot_config_channel()</code> and an <code>adc_cali</code> scheme, and <code>ReadChannelV()</code> with <code>adc_oneshot_read()</code> and
-<code>adc_cali_raw_to_voltage()</code>.</p>
+<p>The ESP32 example's port, <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/examples/esp32/main/esp32_ntc_adc.hpp"><code>esp32_ntc_adc.hpp</code></a>, is a complete
+ESP-IDF port. <code>EnsureInitialized()</code> creates the ADC1 unit with <code>adc_oneshot_new_unit()</code>, configures the channel
+at 12 dB attenuation (about 0 V to 3.3 V, the whole divider) with <code>adc_oneshot_config_channel()</code> and creates an
+<code>adc_cali</code> curve-fitting scheme (line fitting on chips without it). <code>ReadChannelV()</code> reads with
+<code>adc_oneshot_read()</code> and converts with <code>adc_cali_raw_to_voltage()</code>. <code>DelayMs()</code> sleeps with <code>vTaskDelay()</code>.
+Its component needs <code>REQUIRES esp_adc</code>.</p>
 <h2 id="check-your-port">Check your port<a class="headerlink" href="#check-your-port" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Build it: the port on this page is compiled by the host CI from
-   <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/46c5c95c5c224298cfb96c764b43efa072c88701/tests/docs/my_adc.hpp"><code>tests/docs/my_adc.hpp</code></a>, with the driver instantiated over it.</li>
+   <a href="https://github.com/hardfoc/hf-ntc-thermistor-driver/blob/5c127805f759a49d2b62b95d3f3a200804e924e0/tests/docs/my_adc.hpp"><code>tests/docs/my_adc.hpp</code></a>, with the driver instantiated over it.</li>
 <li>Replace the thermistor with a 10 kΩ 0.1 % resistor: <code>GetVoltage()</code> returns half the supply and
    <code>ReadTemperatureCelsius()</code> returns 25 °C within a few
    tenths of a degree, set by the two resistors and the ADC calibration.</li>

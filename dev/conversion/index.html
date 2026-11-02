@@ -1336,7 +1336,7 @@ for the NTCG163JF103FT1S.</p>
 <h2 id="the-pipeline">The pipeline<a class="headerlink" href="#the-pipeline" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart LR
     A["ADC: V_NODE"] --&gt; B["Divider: R = R_SERIES · V / (V_REF − V)"]
-    B --&gt; C["Beta: 1/T = 1/T25 + ln(R/R25) / B"]
+    B --&gt; C["Beta, or the datasheet table (LookupTable)"]
     C --&gt; D["+ calibration_offset"]
     D --&gt; E["EMA filter (optional)"]
     E --&gt; F["min/max check"]</code></pre>
@@ -1409,43 +1409,47 @@ resistance:</p>
 </table>
 <p><em>Derived</em> from Table 3 of the <a href="https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S">spec sheet</a>; the host tests check the 0 °C,
 25 °C, 85 °C, 125 °C and −40 °C rows. Between 10 °C and 95 °C the error stays under 0.6 °C. Outside it, use the
-Steinhart-Hart equation below, or a calibration offset near the temperature that matters to you.</p>
+lookup table or the Steinhart-Hart equation below, or a calibration offset near the temperature that matters to
+you.</p>
 <p>Using B25/50 instead (3382 K on TDK's product page for the NTCG163JF103FT1) moves the exact points to 25 °C and
 50 °C and shifts the error to higher temperatures. Use the B your datasheet gives for the range you care about.</p>
 <h2 id="steinhart-hart-equation">Steinhart-Hart equation<a class="headerlink" href="#steinhart-hart-equation" title="Permanent link">&para;</a></h2>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>1/T = A + B · ln(R) + C · ln(R)³
 </span></code></pre></div>
-<p>Three coefficients fitted at three temperatures follow the curve far better than Beta. Fitted to the
-spec sheet at −40 °C, 25 °C and 125 °C, the coefficients below stay within 0.2 °C of the nominal table from
-−40 °C to +125 °C and within 0.41 °C at +150 °C (<em>derived</em>):</p>
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Coefficients fitted to the NTCG163JF103FT1S table at -40, 25 and 125 C.</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">constexpr</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.8767633e-3F</span><span class="p">;</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">constexpr</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.527899e-4F</span><span class="p">;</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">constexpr</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.906681e-7F</span><span class="p">;</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kt">float</span><span class="w"> </span><span class="n">ohms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">;</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ntc</span><span class="p">.</span><span class="n">GetResistance</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ohms</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">NtcError</span><span class="o">::</span><span class="n">Success</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">ohms</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">const</span><span class="w"> </span><span class="kt">float</span><span class="w"> </span><span class="n">ln_r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">log</span><span class="p">(</span><span class="n">ohms</span><span class="p">);</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="n">celsius</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0F</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ln_r</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ln_r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ln_r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">ln_r</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">273.15F</span><span class="p">;</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<p>Three coefficients fitted at three temperatures follow the curve far better than Beta.
+<code>NTC::CalculateSteinhartHartCoefficients()</code> fits them through three (temperature, resistance) points, and
+<code>NTC::ConvertResistanceToTemperatureSteinhartHart()</code> applies them. Fitted to the spec sheet at −40 °C, 25 °C
+and 125 °C (A = 0.8767633 × 10⁻³, B = 2.527899 × 10⁻⁴, C = 1.906681 × 10⁻⁷), the equation stays within 0.2 °C of
+the nominal table from −40 °C to +125 °C and within 0.41 °C at +150 °C (<em>derived</em>; the host tests check every
+row):</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Fit A, B and C through three rows of the datasheet table (-40, 25 and 125 C) ...</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kt">float</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kt">float</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kt">float</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">NTC</span><span class="o">::</span><span class="n">CalculateSteinhartHartCoefficients</span><span class="p">(</span><span class="mf">-40.0F</span><span class="p">,</span><span class="w"> </span><span class="mf">188500.0F</span><span class="p">,</span><span class="w"> </span><span class="mf">25.0F</span><span class="p">,</span><span class="w"> </span><span class="mf">10000.0F</span><span class="p">,</span><span class="w"> </span><span class="mf">125.0F</span><span class="p">,</span><span class="w"> </span><span class="mf">534.0F</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                                             </span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1">// ... and apply them to the resistance the driver measures.</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="kt">float</span><span class="w"> </span><span class="n">ohms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0F</span><span class="p">;</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="k">return</span><span class="w"> </span><span class="n">ntc</span><span class="p">.</span><span class="n">GetResistance</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ohms</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">NtcError</span><span class="o">::</span><span class="n">Success</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">       </span><span class="n">NTC</span><span class="o">::</span><span class="n">ConvertResistanceToTemperatureSteinhartHart</span><span class="p">(</span><span class="n">ohms</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">celsius</span><span class="p">);</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1">// For the NTCG163JF103FT1S, NTC::ConvertResistanceToTemperatureDefault(ohms, &amp;celsius) uses this fit.</span>
 </span></code></pre></div>
-<p>The driver does not call Steinhart-Hart itself. Read the resistance with <code>GetResistance()</code> and apply the
-equation, as above.</p>
-<div class="admonition warning">
-<p class="admonition-title">Library Steinhart-Hart helpers</p>
-<p><code>NTC::ConvertResistanceToTemperatureSteinhartHart()</code> rejects any C coefficient above 1 × 10⁻⁷, which
-excludes the fit for this part (C ≈ 1.9 × 10⁻⁷); <code>NTC::CalculateSteinhartHartCoefficients()</code> does not
-return a usable fit; and <code>NTC::ConvertResistanceToTemperatureDefault()</code> uses generic coefficients that
-read about 9 °C low at 85 °C for this part. Evaluate the equation yourself until these are fixed.</p>
-</div>
+<p><code>NTC::ConvertResistanceToTemperatureDefault()</code> and <code>NTC::ConvertTemperatureToResistanceDefault()</code> use that fit,
+so they suit the NTCG163JF103FT1S only; pass your own coefficients for another part. The temperature to
+resistance direction solves the cubic exactly, so it inverts the equation. The driver's read path does not
+call Steinhart-Hart: read the resistance with <code>GetResistance()</code> and apply it, as above, or use <code>LookupTable</code>.</p>
 <h2 id="lookup-table">Lookup table<a class="headerlink" href="#lookup-table" title="Permanent link">&para;</a></h2>
-<p><code>NtcConversionMethod::LookupTable</code> searches a per-type table and interpolates. The table shipped in
-<code>src/ntc_lookup_table.cpp</code> does not match the NTCG163JF103FT1S datasheet: it spans 336.7 Ω down to negative
-values, so a reading above 336.7 Ω (every temperature below about 145 °C) falls outside it and the driver
-falls back to the Beta equation. Below 336.7 Ω the table's interpolation returns values that are wrong. Use
-<code>Auto</code> or <code>Mathematical</code> until the table is regenerated from the spec sheet.</p>
+<p><code>NtcConversionMethod::LookupTable</code> searches a per-type table and interpolates. The three TDK types share the
+NTCG163JF103FT1S table in <code>src/ntc_lookup_table.cpp</code>: the nominal column of Table 3 of the
+<a href="https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S">spec sheet</a>, in
+ohms, from −40 °C (188.5 kΩ) to +150 °C (313 Ω) in 5 °C steps. The resistance falls as the temperature rises,
+and the search brackets the reading between two rows. Between rows the driver interpolates the temperature
+linearly in ln(R), which follows the curve to well under 0.1 °C over one 5 °C step.</p>
+<p>At every row the table returns the datasheet temperature exactly, so it removes the Beta equation's error at
+the ends of the range (+4.4 °C at −40 °C). A reading outside the table (colder than −40 °C or hotter than
++150 °C) falls back to the Beta equation. <code>Custom</code> has no table and always uses Beta.</p>
 <h2 id="other-conversions">Other conversions<a class="headerlink" href="#other-conversions" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

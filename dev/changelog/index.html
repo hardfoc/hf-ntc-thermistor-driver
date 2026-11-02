@@ -1142,10 +1142,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
         Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deprecated
       
     </span>
   </a>
@@ -1223,10 +1256,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#breaking-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Breaking changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
         Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deprecated
       
     </span>
   </a>
@@ -1278,6 +1344,14 @@
 <p>What changed in each release of the driver. Entries marked <strong>BREAKING</strong> need source changes in code that used the
 affected API.</p>
 <h2 id="unreleased">Unreleased<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h3 id="breaking-changes">Breaking changes<a class="headerlink" href="#breaking-changes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>BREAKING (behaviour):</strong> <code>NTC::Constants::STEINHART_HART_A_</code>, <code>_B_</code> and <code>_C_</code>, used by
+  <code>NTC::ConvertResistanceToTemperatureDefault()</code> and <code>NTC::ConvertTemperatureToResistanceDefault()</code>, are now
+  the NTCG163JF103FT1S fit through spec sheet Table 3 at −40 °C, 25 °C and 125 °C (0.8767633 × 10⁻³,
+  2.527899 × 10⁻⁴, 1.906681 × 10⁻⁷). The old generic values read 9.4 °C low at 85 °C for this part. Code that
+  relied on the old values for another thermistor must pass its own coefficients.</li>
+</ul>
 <h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The documentation site moved to the HardFOC MkDocs platform: new page set (quickstart, hardware, conversion
@@ -1285,12 +1359,62 @@ affected API.</p>
   reference under <code>/api/</code>, and every code sample compiled by the host build from <code>tests/docs/</code>.</li>
 <li>Added the TDK NTCG163JF103FT1S spec sheet and corrected the part facts: operating range −40 °C to +150 °C,
   B25/85 = 3435 K ± 1 %, 100 mW rated power. The documentation now states the Beta equation's error against the
-  datasheet table, that the lookup table is not usable, and that the driver needs C++20.</li>
+  datasheet table and that the driver needs C++20.</li>
+</ul>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The NTCG163JF103FT1S lookup table now holds the spec sheet's Table 3 nominal resistances in ohms, −40 °C to
+  +150 °C in 5 °C steps (it held values that were neither ohms nor this part's curve, including negative
+  ones). The search and the validation follow the falling resistance of an NTC, and interpolation is linear in
+  ln(R). <code>NtcConversionMethod::LookupTable</code> now reads the datasheet temperature at every row instead of falling
+  back to the Beta equation.</li>
+<li>Steinhart-Hart helpers: <code>NTC::CalculateSteinhartHartCoefficients()</code> solved the 3 × 3 system with a wrong
+  determinant (in float) and returned no usable fit; it now solves it in closed form in double precision.
+  <code>NTC::ValidateSteinhartHartCoefficients()</code> rejected C above 1 × 10⁻⁷, which excluded this part's fit
+  (C = 1.9 × 10⁻⁷); it now accepts |C| up to 1 × 10⁻⁶ and rejects non-finite values.
+  <code>NTC::ConvertTemperatureToResistanceSteinhartHart()</code> dropped the C term; it now solves the cubic exactly.</li>
+<li><code>Calibrate()</code> replaced the offset with <code>reference − reading</code>, but the reading already included the old
+  offset, so calibrating with a non-zero offset left the sensor off by that offset. It now adds the correction
+  to the existing offset. Calling <code>ResetCalibration()</code> first, as the docs advised, gives the same result as
+  before.</li>
+<li><code>sample_delay_ms</code> was a busy-wait loop that the compiler could remove, so it waited an unknown time or none.
+  The driver now waits through an optional <code>DelayMs(uint32_t ms)</code> hook on the ADC port, detected at compile
+  time; a port without it takes the samples back to back. Existing ports compile unchanged.</li>
+<li>
+<p><code>NTC::CalculateOptimalSeriesResistance()</code> and <code>NTC::CalculateTemperatureAccuracy()</code> used B = 3435 K whatever
+  the part. New overloads take R25 and B (from <code>ntc_config_t</code>); the accuracy estimate is now the worst-case
+  error from the R25 and B tolerances, which reproduces the spec sheet's Table 3 Min/Max band (0.26 °C at
+  25 °C, 1.1 °C at 85 °C) instead of a fixed-divisor approximation.</p>
+</li>
+<li>
+<p><code>GetNtcThermistorDriverVersion()</code> returned an empty string: the build settings never set
+  <code>HF_NTC_THERMISTOR_VERSION_STRING</code>, which <code>ntc_thermistor_version.h.in</code> uses. It now returns "1.0.0".</p>
+</li>
+<li>
+<p>The ESP32 example used a simulated ADC that returned a fixed mid-scale count, and B = 3950 K. It now reads
+  the ESP32-C6 ADC through <code>examples/esp32/main/esp32_ntc_adc.hpp</code> (<code>adc_oneshot</code> with <code>adc_cali</code> calibration
+  and a <code>DelayMs()</code> hook), configures the NTCG163JF103FT1S (B25/85 = 3435 K) with the lookup table, and tests
+  a real reading. <code>mock_esp32_adc.hpp</code> is removed.</p>
+</li>
+</ul>
+<h3 id="deprecated">Deprecated<a class="headerlink" href="#deprecated" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>NTC::CalculateOptimalSeriesResistance(r25, t_min, t_max, &amp;r)</code> and
+  <code>NTC::CalculateTemperatureAccuracy(r, tol_r, tol_b, &amp;acc)</code>: they assume the default part (R25 = 10 kΩ,
+  B = 3435 K). Use the overloads that take B (and R25).</li>
 </ul>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Host unit tests (<code>HF_NTC_THERMISTOR_BUILD_TESTS</code>) that run the driver against a model of the ADC and divider
-  and check readings against the NTCG163JF103FT1S resistance table.</li>
+<li>
+<p>CMake <code>install()</code> rules: the library, the headers with <code>src/ntc_thermistor.ipp</code>, the generated version header
+  and an exported package, so <code>find_package(hf_ntc_thermistor)</code> and <code>hf::ntc_thermistor</code> work from an install
+  prefix. <code>hf::ntc_thermistor</code> is also an alias in the build tree. The package configuration no longer includes
+  the build-settings file, which was not installed.</p>
+</li>
+<li>
+<p>Host unit tests (<code>HF_NTC_THERMISTOR_BUILD_TESTS</code>) that run the driver against a model of the ADC and divider
+  and check readings against the NTCG163JF103FT1S resistance table.</p>
+</li>
 </ul>
 
 

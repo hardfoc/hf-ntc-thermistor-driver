@@ -1476,8 +1476,9 @@ divider on 25 °C:</p>
 <p><em>Derived</em> from the spec sheet's Table 3 for 3.3 V, 10 kΩ and a 12-bit ADC (0.81 mV per LSB); the slope is
 −30.8 mV/°C at 25 °C and −3.6 mV/°C at 125 °C. For a range that
 sits away from 25 °C, choose R<sub>SERIES</sub> near R<sub>NTC</sub> at its centre;
-<code>NTC::CalculateOptimalSeriesResistance()</code> returns the geometric mean of R<sub>NTC</sub> at the two ends of a
-range (it assumes B = 3435 K).</p>
+<code>NTC::CalculateOptimalSeriesResistance(r25, beta, t_min, t_max, &amp;r)</code> returns the geometric mean of
+R<sub>NTC</sub> at the two ends of a range, from your part's R25 and B (pass <code>cfg.resistance_at_25c</code> and
+<code>cfg.beta_value</code>).</p>
 <p>Use a 1 % or better resistor with a low temperature coefficient, and keep it away from the heat you measure.</p>
 <h2 id="adc-input-and-filtering">ADC input and filtering<a class="headerlink" href="#adc-input-and-filtering" title="Permanent link">&para;</a></h2>
 <p>The ADC sees the divider's source resistance, R<sub>SERIES</sub> ∥ R<sub>NTC</sub>: 5 kΩ at 25 °C for
