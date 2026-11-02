@@ -13,7 +13,15 @@ code that used the affected API; together they call for a major version bump at 
   reference under `/api/`, and every code sample compiled by the host build from `tests/docs/`.
 - Added the TDK NTCG163JF103FT1S spec sheet and corrected the part facts: operating range −40 °C to +150 °C,
   B25/85 = 3435 K ± 1 %, 100 mW rated power. The documentation now states the Beta equation's error against the
-  datasheet table, that the lookup table is not usable, and that the driver needs C++20.
+  datasheet table and that the driver needs C++20.
+
+### Fixed
+
+- The NTCG163JF103FT1S lookup table now holds the spec sheet's Table 3 nominal resistances in ohms, −40 °C to
+  +150 °C in 5 °C steps (it held values that were neither ohms nor this part's curve, including negative
+  ones). The search and the validation follow the falling resistance of an NTC, and interpolation is linear in
+  ln(R). `NtcConversionMethod::LookupTable` now reads the datasheet temperature at every row instead of falling
+  back to the Beta equation.
 
 ### Added
 

@@ -38,10 +38,9 @@ if not, see the next section. A part near a hot spot may be right.
 | Wrong supply value | Measure the divider supply | Set `reference_voltage` to it: 1 % is about 0.5 °C at 25 °C |
 | Wrong series resistor | Measure it | Set `series_resistance` |
 | Uncalibrated ADC | `GetVoltage()` against a meter | Use your SDK's ADC calibration in `ReadChannelV()` |
-| Beta error far from 25 °C to 85 °C | The error grows with distance: +4.4 °C at −40 °C for this part | Steinhart-Hart or a calibration offset ([Conversion methods](conversion.md)) |
+| Beta error far from 25 °C to 85 °C | The error grows with distance: +4.4 °C at −40 °C for this part | `LookupTable` for the TDK types, Steinhart-Hart or a calibration offset ([Conversion methods](conversion.md)) |
 | Wrong B for the part | B25/50 and B25/85 differ by 1 % to 2 % | Use the B for your range |
 | Self-heating | Reading drops when you lower the divider current | Larger resistors, or power the divider only while sampling ([Hardware](hardware.md#self-heating)) |
-| `LookupTable` method | The setting in `conversion_method` | Use `Auto` ([Conversion methods](conversion.md#lookup-table)) |
 
 ## Reading moves the wrong way
 

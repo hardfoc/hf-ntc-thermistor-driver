@@ -72,6 +72,6 @@ virtual destructor, so each driver object carries one vtable pointer.
 | `inc/ntc_adc_interface.hpp` | `ntc::AdcInterface<Derived>` and `ntc::AdcError` |
 | `inc/ntc_types.hpp` | `ntc_config_t`, `ntc_reading_t`, `NtcError`, `NtcType`, defaults |
 | `inc/ntc_conversion.hpp`, `src/ntc_conversion.cpp` | Beta, Steinhart-Hart, divider and validation functions |
-| `inc/ntc_lookup_table.hpp`, `src/ntc_lookup_table.cpp` | Lookup tables and search ([status](conversion.md#lookup-table)) |
+| `inc/ntc_lookup_table.hpp`, `src/ntc_lookup_table.cpp` | Lookup tables and search ([details](conversion.md#lookup-table)) |
 | `tests/` | Host unit tests and the compiled documentation snippets |
 | `examples/esp32/` | ESP-IDF test application |

@@ -172,12 +172,30 @@ TEST_CASE("ReadTemperature fills every unit, the resistance and the raw count") 
   CHECK_EQ(r.adc_raw_value, 2048U);
 }
 
-TEST_CASE("LookupTable falls back to the Beta model for a 10 kOhm reading") {
+TEST_CASE("LookupTable reads the datasheet temperatures where Beta is off") {
   MockAdc adc;
-  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  ntc_config_t cfg = GetDefaultNtcConfig();
+  cfg.conversion_method = NtcConversionMethod::LookupTable;
+  cfg.min_temperature = -40.5F;
+  cfg.max_temperature = 150.0F;
+  Ntc ntc(cfg, &adc);
   REQUIRE(ntc.Initialize());
-  REQUIRE(ntc.SetConversionMethod(NtcConversionMethod::LookupTable) == NtcError::Success);
   CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_NEAR(readAt(ntc, adc, kR_0C), 0.0, 0.05);     // Beta reads +1.1 C
+  CHECK_NEAR(readAt(ntc, adc, kR_125C), 125.0, 0.05); // Beta reads +1.7 C
+  CHECK_NEAR(readAt(ntc, adc, kR_m40C), -40.0, 0.05); // Beta reads +4.4 C
+}
+
+TEST_CASE("LookupTable falls back to the Beta model outside the table") {
+  MockAdc adc;
+  ntc_config_t cfg = GetDefaultNtcConfig();
+  cfg.conversion_method = NtcConversionMethod::LookupTable;
+  cfg.min_temperature = -60.0F;
+  Ntc ntc(cfg, &adc);
+  REQUIRE(ntc.Initialize());
+  float beta_c = 0.0F;
+  REQUIRE(NTC::ConvertResistanceToTemperatureBeta(250000.0F, 10000.0F, 3435.0F, &beta_c));
+  CHECK_NEAR(readAt(ntc, adc, 250000.0F), beta_c, 0.05); // above the -40 C row
 }
 
 TEST_CASE("Free functions: Beta in both directions and B from two points") {

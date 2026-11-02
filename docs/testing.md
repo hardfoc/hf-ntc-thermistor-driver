@@ -19,6 +19,7 @@ ctest --test-dir build-host --output-on-failure
 | File | Covers |
 | --- | --- |
 | [`tests/test_driver.cpp`](../tests/test_driver.cpp) | Initialisation, Beta accuracy against the table, errors, averaging, open and short, range, calibration, filter, free functions |
+| [`tests/test_conversion.cpp`](../tests/test_conversion.cpp) | The lookup table and the Steinhart-Hart helpers against every row of the datasheet table |
 | [`tests/mock_adc.hpp`](../tests/mock_adc.hpp) | The ADC and divider model |
 | [`tests/test_harness.hpp`](../tests/test_harness.hpp) | A small test registry and check macros |
 

@@ -74,11 +74,16 @@ equation, as above.
 
 ## Lookup table
 
-`NtcConversionMethod::LookupTable` searches a per-type table and interpolates. The table shipped in
-`src/ntc_lookup_table.cpp` does not match the NTCG163JF103FT1S datasheet: it spans 336.7 Ω down to negative
-values, so a reading above 336.7 Ω (every temperature below about 145 °C) falls outside it and the driver
-falls back to the Beta equation. Below 336.7 Ω the table's interpolation returns values that are wrong. Use
-`Auto` or `Mathematical` until the table is regenerated from the spec sheet.
+`NtcConversionMethod::LookupTable` searches a per-type table and interpolates. The three TDK types share the
+NTCG163JF103FT1S table in `src/ntc_lookup_table.cpp`: the nominal column of Table 3 of the
+[spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S), in
+ohms, from −40 °C (188.5 kΩ) to +150 °C (313 Ω) in 5 °C steps. The resistance falls as the temperature rises,
+and the search brackets the reading between two rows. Between rows the driver interpolates the temperature
+linearly in ln(R), which follows the curve to well under 0.1 °C over one 5 °C step.
+
+At every row the table returns the datasheet temperature exactly, so it removes the Beta equation's error at
+the ends of the range (+4.4 °C at −40 °C). A reading outside the table (colder than −40 °C or hotter than
++150 °C) falls back to the Beta equation. `Custom` has no table and always uses Beta.
 
 ## Other conversions
 

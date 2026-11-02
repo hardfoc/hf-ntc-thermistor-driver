@@ -39,8 +39,8 @@ and B. Change any field before construction, or with `SetConfiguration()` afterw
 :   The fixed resistor between the supply and the ADC node, in ohms.
 
 `conversion_method`
-:   `Auto` and `Mathematical` use the Beta equation. `LookupTable` tries the type's table first and falls back
-    to Beta; the shipped table is not usable yet ([Conversion methods](conversion.md#lookup-table)).
+:   `Auto` and `Mathematical` use the Beta equation. `LookupTable` uses the type's datasheet table from −40 °C
+    to +150 °C and falls back to Beta outside it ([Conversion methods](conversion.md#lookup-table)).
 
 `adc_channel`
 :   The channel number passed to your port. `SetAdcChannel()` asks the port's `IsChannelAvailable()` first.
