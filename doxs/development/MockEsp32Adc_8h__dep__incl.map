@@ -1,5 +1,0 @@
-<map id="examples/esp32/main/MockEsp32Adc.h" name="examples/esp32/main/MockEsp32Adc.h">
-<area shape="rect" id="Node000001" title="Mock ADC implementation for ESP32&#45;C6 testing." alt="" coords="33,5,199,45"/>
-<area shape="rect" id="Node000002" href="$NtcThermistorComprehensiveTest_8cpp.html" title="Comprehensive test suite for NTC Thermistor driver on ESP32&#45;C6." alt="" coords="5,93,227,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,59,119,93,113,93,113,59"/>
-</map>

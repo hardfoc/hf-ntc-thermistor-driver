@@ -1,8 +1,0 @@
-<map id="src/NtcThermistor.cpp" name="src/NtcThermistor.cpp">
-<area shape="rect" id="Node000001" title="Hardware&#45;agnostic NTC thermistor driver implementation." alt="" coords="34,5,198,31"/>
-<area shape="rect" id="Node000002" href="$NtcThermistor_8h.html" title="Hardware&#45;agnostic NTC thermistor driver for temperature measurement." alt="" coords="41,79,191,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,44,112,78,106,79,105,45"/>
-<area shape="poly" id="edge3_Node000002_Node000001" title=" " alt="" coords="122,65,120,31,126,31,127,65"/>
-<area shape="rect" id="Node000003" href="$NtcThermistorComprehensiveTest_8cpp.html" title="Comprehensive test suite for NTC Thermistor driver on ESP32&#45;C6." alt="" coords="5,152,227,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,118,119,152,113,152,113,118"/>
-</map>

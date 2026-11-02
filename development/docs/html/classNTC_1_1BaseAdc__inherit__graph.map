@@ -1,5 +1,0 @@
-<map id="NTC::BaseAdc" name="NTC::BaseAdc">
-<area shape="rect" id="Node000001" title="Abstract base class for ADC interface." alt="" coords="9,5,121,31"/>
-<area shape="rect" id="Node000002" href="$classMockEsp32Adc.html" title="Mock ADC implementation for testing." alt="" coords="5,79,125,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,44,68,79,63,79,63,44"/>
-</map>
