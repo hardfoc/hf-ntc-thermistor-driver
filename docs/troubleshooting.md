@@ -58,5 +58,6 @@ parts, or return V<sub>REF</sub> − V<sub>NODE</sub> from the port ([Hardware](
 
 ## Calibration made it worse
 
-`Calibrate()` measures with the current offset applied and replaces it. Call `ResetCalibration()` before
-`Calibrate()`, and calibrate at the temperature you care about most.
+`Calibrate()` corrects the reading at one temperature only: the offset is a constant, so the Beta equation's
+error elsewhere remains ([Conversion methods](conversion.md)). Calibrate at the temperature you care about most,
+with the sensor settled at the reference, and use `LookupTable` or Steinhart-Hart for a wide range.

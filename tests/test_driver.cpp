@@ -146,6 +146,22 @@ TEST_CASE("Calibration offset is added to every reading") {
   CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
 }
 
+TEST_CASE("Calibrate adds the correction to an existing offset") {
+  MockAdc adc;
+  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetCalibrationOffset(1.5F) == NtcError::Success);
+  adc.thermistor_ohms = kR_25C; // reads 26.5 C with the offset
+  REQUIRE(ntc.Calibrate(24.0F) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
+  float offset = 0.0F;
+  REQUIRE(ntc.GetCalibrationOffset(&offset) == NtcError::Success);
+  CHECK_NEAR(offset, -1.0, 0.05); // 1.5 + (24.0 - 26.5)
+  // Calibrating again at the same point changes nothing.
+  REQUIRE(ntc.Calibrate(24.0F) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
+}
+
 TEST_CASE("Filtering is an exponential moving average seeded by the first reading") {
   MockAdc adc;
   Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);

@@ -399,11 +399,10 @@ NtcError NtcThermistor<AdcType>::Calibrate(
     return read_error;
   }
 
-  // Calculate calibration offset
-  float new_offset = reference_temperature_celsius - current_temperature;
-
-  // Apply offset
-  config_.calibration_offset = new_offset;
+  // The reading already includes the current offset, so add the remaining
+  // error to it rather than replacing it.
+  config_.calibration_offset +=
+      reference_temperature_celsius - current_temperature;
 
   return NtcError::Success;
 }

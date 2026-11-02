@@ -239,6 +239,11 @@ public:
 
   /**
    * @brief Calibrate the thermistor
+   *
+   * Takes a reading (current offset applied) and adds
+   * (reference - reading) to the offset, so afterwards the sensor reads the
+   * reference temperature whatever offset was set before.
+   *
    * @param reference_temperature_celsius Known reference temperature
    * @return Error code
    */

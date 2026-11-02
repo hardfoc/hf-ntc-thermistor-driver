@@ -75,8 +75,9 @@ slowly; changing the filter or the configuration resets it.
 --8<-- "tests/docs/api_tasks.cpp:calibrate"
 ```
 
-`Calibrate(t)` reads the sensor and sets the offset to `t − reading`. The reading already includes the current
-offset, so call `ResetCalibration()` first, as above. The offset is a constant: it corrects R25 tolerance and
+`Calibrate(t)` reads the sensor, with the current offset applied, and adds `t − reading` to the offset, so the
+sensor then reads `t` whatever offset was set before. `ResetCalibration()` first is optional; it starts from
+zero, as above. The offset is a constant: it corrects R25 tolerance and
 divider errors well, and the Beta equation's error only near the calibration temperature
 ([Conversion methods](conversion.md)). The offset lives in RAM; store it yourself.
 

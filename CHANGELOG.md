@@ -35,6 +35,10 @@ code that used the affected API; together they call for a major version bump at 
   `NTC::ValidateSteinhartHartCoefficients()` rejected C above 1 × 10⁻⁷, which excluded this part's fit
   (C = 1.9 × 10⁻⁷); it now accepts |C| up to 1 × 10⁻⁶ and rejects non-finite values.
   `NTC::ConvertTemperatureToResistanceSteinhartHart()` dropped the C term; it now solves the cubic exactly.
+- `Calibrate()` replaced the offset with `reference − reading`, but the reading already included the old
+  offset, so calibrating with a non-zero offset left the sensor off by that offset. It now adds the correction
+  to the existing offset. Calling `ResetCalibration()` first, as the docs advised, gives the same result as
+  before.
 
 ### Added
 
