@@ -44,7 +44,8 @@ resistance:
 
 *Derived* from Table 3 of the [spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S); the host tests check the 0 °C,
 25 °C, 85 °C, 125 °C and −40 °C rows. Between 10 °C and 95 °C the error stays under 0.6 °C. Outside it, use the
-Steinhart-Hart equation below, or a calibration offset near the temperature that matters to you.
+lookup table or the Steinhart-Hart equation below, or a calibration offset near the temperature that matters to
+you.
 
 Using B25/50 instead (3382 K on TDK's product page for the NTCG163JF103FT1) moves the exact points to 25 °C and
 50 °C and shifts the error to higher temperatures. Use the B your datasheet gives for the range you care about.
@@ -55,22 +56,21 @@ Using B25/50 instead (3382 K on TDK's product page for the NTCG163JF103FT1) move
 1/T = A + B · ln(R) + C · ln(R)³
 ```
 
-Three coefficients fitted at three temperatures follow the curve far better than Beta. Fitted to the
-spec sheet at −40 °C, 25 °C and 125 °C, the coefficients below stay within 0.2 °C of the nominal table from
-−40 °C to +125 °C and within 0.41 °C at +150 °C (*derived*):
+Three coefficients fitted at three temperatures follow the curve far better than Beta.
+`NTC::CalculateSteinhartHartCoefficients()` fits them through three (temperature, resistance) points, and
+`NTC::ConvertResistanceToTemperatureSteinhartHart()` applies them. Fitted to the spec sheet at −40 °C, 25 °C
+and 125 °C (A = 0.8767633 × 10⁻³, B = 2.527899 × 10⁻⁴, C = 1.906681 × 10⁻⁷), the equation stays within 0.2 °C of
+the nominal table from −40 °C to +125 °C and within 0.41 °C at +150 °C (*derived*; the host tests check every
+row):
 
 ```cpp
 --8<-- "tests/docs/api_tasks.cpp:steinhart-hart"
 ```
 
-The driver does not call Steinhart-Hart itself. Read the resistance with `GetResistance()` and apply the
-equation, as above.
-
-!!! warning "Library Steinhart-Hart helpers"
-    `NTC::ConvertResistanceToTemperatureSteinhartHart()` rejects any C coefficient above 1 × 10⁻⁷, which
-    excludes the fit for this part (C ≈ 1.9 × 10⁻⁷); `NTC::CalculateSteinhartHartCoefficients()` does not
-    return a usable fit; and `NTC::ConvertResistanceToTemperatureDefault()` uses generic coefficients that
-    read about 9 °C low at 85 °C for this part. Evaluate the equation yourself until these are fixed.
+`NTC::ConvertResistanceToTemperatureDefault()` and `NTC::ConvertTemperatureToResistanceDefault()` use that fit,
+so they suit the NTCG163JF103FT1S only; pass your own coefficients for another part. The temperature to
+resistance direction solves the cubic exactly, so it inverts the equation. The driver's read path does not
+call Steinhart-Hart: read the resistance with `GetResistance()` and apply it, as above, or use `LookupTable`.
 
 ## Lookup table
 

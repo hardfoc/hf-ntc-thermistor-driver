@@ -95,18 +95,19 @@ void errors(Ntc& ntc) {
 
 bool steinhart_hart(Ntc& ntc, float& celsius) {
   // --8<-- [start:steinhart-hart]
-  // Coefficients fitted to the NTCG163JF103FT1S table at -40, 25 and 125 C.
-  constexpr float A = 0.8767633e-3F;
-  constexpr float B = 2.527899e-4F;
-  constexpr float C = 1.906681e-7F;
-
-  float ohms = 0.0F;
-  if (ntc.GetResistance(&ohms) != NtcError::Success || ohms <= 0.0F) {
+  // Fit A, B and C through three rows of the datasheet table (-40, 25 and 125 C) ...
+  float a = 0.0F;
+  float b = 0.0F;
+  float c = 0.0F;
+  if (!NTC::CalculateSteinhartHartCoefficients(-40.0F, 188500.0F, 25.0F, 10000.0F, 125.0F, 534.0F,
+                                               &a, &b, &c)) {
     return false;
   }
-  const float ln_r = std::log(ohms);
-  celsius = 1.0F / (A + B * ln_r + C * ln_r * ln_r * ln_r) - 273.15F;
-  return true;
+  // ... and apply them to the resistance the driver measures.
+  float ohms = 0.0F;
+  return ntc.GetResistance(&ohms) == NtcError::Success &&
+         NTC::ConvertResistanceToTemperatureSteinhartHart(ohms, a, b, c, &celsius);
+  // For the NTCG163JF103FT1S, NTC::ConvertResistanceToTemperatureDefault(ohms, &celsius) uses this fit.
   // --8<-- [end:steinhart-hart]
 }
 

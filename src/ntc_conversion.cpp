@@ -159,27 +159,40 @@ bool ConvertTemperatureToResistanceSteinhartHart(
     return false;
   }
 
-  // Steinhart-Hart equation: ln(R) = (1/T - A - C*ln(R)^3) / B
-  // This requires iterative solution, so we use a simplified approach
-
-  const float temp_kelvin = temperature_celsius + KELVIN_OFFSET_;
-  if (temp_kelvin <= ZERO_FLOAT_) {
+  // Steinhart-Hart: 1/T = A + B*x + C*x^3 with x = ln(R). Solve the cubic
+  // C*x^3 + B*x + (A - 1/T) = 0 for x. With B > 0 and C >= 0 it is
+  // monotonic and has one real root (Cardano); C == 0 reduces to x = (1/T - A)/B.
+  const double temp_kelvin =
+      static_cast<double>(temperature_celsius) + KELVIN_OFFSET_;
+  if (temp_kelvin <= 0.0) {
     return false; // Invalid temperature
   }
 
-  const float inv_temperature = ONE_FLOAT_ / temp_kelvin;
-
-  // For most NTC thermistors, the C term is small, so we can approximate
-  // ln(R) ≈ (1/T - A) / B
-  const float ln_R_approx = (inv_temperature - coeff_a) / coeff_b;
-
-  constexpr float kMaxLnResistanceApprox = 20.0F;
-  if (ln_R_approx <= -kMaxLnResistanceApprox ||
-      ln_R_approx >= kMaxLnResistanceApprox) {
-    return false; // Result out of reasonable range
+  const double a = coeff_a;
+  const double b = coeff_b;
+  const double c = coeff_c;
+  const double y = (1.0 / temp_kelvin) - a;
+  double ln_r = 0.0;
+  if (std::abs(c) < 1e-15) {
+    ln_r = y / b;
+  } else {
+    // x^3 + p*x + q = 0 with p = B/C, q = -y/C
+    const double p = b / c;
+    const double q = -y / c;
+    const double disc = ((q * q) / 4.0) + ((p * p * p) / 27.0);
+    if (disc < 0.0) {
+      return false; // three real roots: not a monotonic NTC curve
+    }
+    const double s = std::sqrt(disc);
+    ln_r = std::cbrt((-q / 2.0) + s) + std::cbrt((-q / 2.0) - s);
   }
 
-  *resistance_ohms = std::exp(ln_R_approx);
+  constexpr double kMaxLnResistance = 20.0;
+  if (!(ln_r > -kMaxLnResistance && ln_r < kMaxLnResistance)) {
+    return false; // Result out of reasonable range (or NaN)
+  }
+
+  *resistance_ohms = static_cast<float>(std::exp(ln_r));
 
   return true;
 }
@@ -320,17 +333,19 @@ bool ValidateBetaValue(float beta_value) noexcept {
 
 bool ValidateSteinhartHartCoefficients(float coeff_a, float coeff_b,
                                        float coeff_c) noexcept {
-  // Validate reasonable ranges for Steinhart-Hart coefficients
-  // These are typical ranges, but may vary for specific thermistors
-  constexpr float MIN_COEFF_A_ = -1e-2F;
-  constexpr float MAX_COEFF_A_ = 1e-2F;
+  // Ranges that cover NTC fits from about 1 kOhm to 1 MOhm. The C term of
+  // the NTCG163JF103FT1S fit is 1.9e-7 (spec sheet Table 3), so C must be
+  // allowed well above 1e-7.
+  constexpr float MAX_ABS_COEFF_A_ = 1e-2F;
   constexpr float MIN_COEFF_B_ = 1e-4F;
   constexpr float MAX_COEFF_B_ = 1e-3F;
-  constexpr float MIN_COEFF_C_ = -1e-7F;
-  constexpr float MAX_COEFF_C_ = 1e-7F;
-  return (coeff_a >= MIN_COEFF_A_ && coeff_a <= MAX_COEFF_A_ &&
-          coeff_b >= MIN_COEFF_B_ && coeff_b <= MAX_COEFF_B_ &&
-          coeff_c >= MIN_COEFF_C_ && coeff_c <= MAX_COEFF_C_);
+  constexpr float MAX_ABS_COEFF_C_ = 1e-6F;
+  if (!std::isfinite(coeff_a) || !std::isfinite(coeff_b) ||
+      !std::isfinite(coeff_c)) {
+    return false;
+  }
+  return (std::abs(coeff_a) <= MAX_ABS_COEFF_A_ && coeff_b >= MIN_COEFF_B_ &&
+          coeff_b <= MAX_COEFF_B_ && std::abs(coeff_c) <= MAX_ABS_COEFF_C_);
 }
 
 //--------------------------------------
@@ -418,59 +433,30 @@ bool CalculateSteinhartHartCoefficients(
     return false;
   }
 
-  // Convert temperatures to Kelvin
-  const float temp1_kelvin = temp1_celsius + KELVIN_OFFSET_;
-  const float temp2_kelvin = temp2_celsius + KELVIN_OFFSET_;
-  const float temp3_kelvin = temp3_celsius + KELVIN_OFFSET_;
+  // Solve 1/T_i = A + B*L_i + C*L_i^3 (L_i = ln R_i) for the three points in
+  // double precision: the system is badly conditioned in float.
+  const double l1 = std::log(static_cast<double>(resistance1_ohms));
+  const double l2 = std::log(static_cast<double>(resistance2_ohms));
+  const double l3 = std::log(static_cast<double>(resistance3_ohms));
+  const double y1 = 1.0 / (static_cast<double>(temp1_celsius) + KELVIN_OFFSET_);
+  const double y2 = 1.0 / (static_cast<double>(temp2_celsius) + KELVIN_OFFSET_);
+  const double y3 = 1.0 / (static_cast<double>(temp3_celsius) + KELVIN_OFFSET_);
 
-  // Calculate natural logarithms of resistances
-  const float ln_R1 = std::log(resistance1_ohms);
-  const float ln_R2 = std::log(resistance2_ohms);
-  const float ln_R3 = std::log(resistance3_ohms);
-
-  // Calculate inverse temperatures
-  const float inv_T1 = ONE_FLOAT_ / temp1_kelvin;
-  const float inv_T2 = ONE_FLOAT_ / temp2_kelvin;
-  const float inv_T3 = ONE_FLOAT_ / temp3_kelvin;
-
-  // Solve the system of equations using Cramer's rule
-  // Matrix: [1 ln_R1 ln_R1^3] [A]   [1/T1]
-  //         [1 ln_R2 ln_R2^3] [B] = [1/T2]
-  //         [1 ln_R3 ln_R3^3] [C]   [1/T3]
-
-  const float det =
-      (ONE_FLOAT_ *
-       (ln_R2 * ln_R3 * ln_R3 * ln_R3 - ln_R3 * ln_R2 * ln_R2 * ln_R2)) +
-      (ln_R1 *
-       (ln_R3 * ln_R2 * ln_R2 * ln_R2 - ln_R2 * ln_R3 * ln_R3 * ln_R3)) +
-      (ln_R1 * ln_R1 * ln_R1 * (ln_R2 - ln_R3));
-
-  if (std::abs(det) < EPSILON_DOUBLE_) {
-    return false; // Singular matrix
+  constexpr double kMinLnDiff = 1e-9;
+  if (std::abs(l2 - l1) < kMinLnDiff || std::abs(l3 - l1) < kMinLnDiff ||
+      std::abs(l3 - l2) < kMinLnDiff || std::abs(l1 + l2 + l3) < kMinLnDiff) {
+    return false; // Singular: two resistances (nearly) equal
   }
 
-  const float det_a =
-      (inv_T1 *
-       (ln_R2 * ln_R3 * ln_R3 * ln_R3 - ln_R3 * ln_R2 * ln_R2 * ln_R2)) +
-      (inv_T2 *
-       (ln_R3 * ln_R1 * ln_R1 * ln_R1 - ln_R1 * ln_R3 * ln_R3 * ln_R3)) +
-      (inv_T3 *
-       (ln_R1 * ln_R2 * ln_R2 * ln_R2 - ln_R2 * ln_R1 * ln_R1 * ln_R1));
+  const double g2 = (y2 - y1) / (l2 - l1);
+  const double g3 = (y3 - y1) / (l3 - l1);
+  const double c = ((g3 - g2) / (l3 - l2)) / (l1 + l2 + l3);
+  const double b = g2 - (c * ((l1 * l1) + (l1 * l2) + (l2 * l2)));
+  const double a = y1 - ((b + (l1 * l1 * c)) * l1);
 
-  const float det_b =
-      (ONE_FLOAT_ *
-       (inv_T2 * ln_R3 * ln_R3 * ln_R3 - inv_T3 * ln_R2 * ln_R2 * ln_R2)) +
-      (ln_R1 *
-       (inv_T3 * ln_R1 * ln_R1 * ln_R1 - inv_T1 * ln_R3 * ln_R3 * ln_R3)) +
-      (ln_R1 * ln_R1 * ln_R1 * (inv_T1 - inv_T2));
-
-  const float det_c = (ONE_FLOAT_ * (ln_R2 * inv_T3 - ln_R3 * inv_T2)) +
-                      (ln_R1 * (ln_R3 * inv_T1 - ln_R1 * inv_T3)) +
-                      (ln_R1 * ln_R1 * ln_R1 * (inv_T2 - inv_T1));
-
-  *coeff_a = det_a / det;
-  *coeff_b = det_b / det;
-  *coeff_c = det_c / det;
+  *coeff_a = static_cast<float>(a);
+  *coeff_b = static_cast<float>(b);
+  *coeff_c = static_cast<float>(c);
 
   return ValidateSteinhartHartCoefficients(*coeff_a, *coeff_b, *coeff_c);
 }

@@ -101,3 +101,58 @@ TEST_CASE("Lookup table rejects resistances and temperatures outside it") {
   REQUIRE(NTC::BinarySearchLookupTable(t, 10000.0F, &lo, &hi));
   CHECK(t->entries[lo].resistance_ohms >= 10000.0F && t->entries[hi].resistance_ohms <= 10000.0F);
 }
+
+namespace {
+float rowOhms(float celsius) {
+  for (const Row& row : kTable3) {
+    if (row.celsius == celsius) {
+      return row.ohms;
+    }
+  }
+  return 0.0F;
+}
+} // namespace
+
+TEST_CASE("Steinhart-Hart coefficients from three datasheet points reproduce them") {
+  float a = 0.0F;
+  float b = 0.0F;
+  float c = 0.0F;
+  REQUIRE(NTC::CalculateSteinhartHartCoefficients(-40.0F, rowOhms(-40.0F), 25.0F, rowOhms(25.0F), 125.0F,
+                                                  rowOhms(125.0F), &a, &b, &c));
+  // Reference fit of Table 3 at -40, 25 and 125 C (computed in double precision).
+  CHECK_NEAR(a, 8.767633e-4, 1e-7);
+  CHECK_NEAR(b, 2.527899e-4, 1e-8);
+  CHECK_NEAR(c, 1.906681e-7, 5e-10);
+  for (const float t : {-40.0F, 25.0F, 125.0F}) {
+    float celsius = 0.0F;
+    REQUIRE(NTC::ConvertResistanceToTemperatureSteinhartHart(rowOhms(t), a, b, c, &celsius));
+    CHECK_NEAR(celsius, t, 0.02);
+  }
+}
+
+TEST_CASE("Default Steinhart-Hart follows datasheet Table 3 within 0.2 C to 125 C") {
+  for (const Row& row : kTable3) {
+    float celsius = 0.0F;
+    REQUIRE(NTC::ConvertResistanceToTemperatureDefault(row.ohms, &celsius));
+    CHECK_NEAR(celsius, row.celsius, row.celsius <= 125.0F ? 0.2 : 0.45);
+  }
+}
+
+TEST_CASE("Steinhart-Hart temperature to resistance inverts the equation, C term included") {
+  for (const Row& row : kTable3) {
+    float ohms = 0.0F;
+    REQUIRE(NTC::ConvertTemperatureToResistanceDefault(row.celsius, &ohms));
+    float back = 0.0F;
+    REQUIRE(NTC::ConvertResistanceToTemperatureDefault(ohms, &back));
+    CHECK_NEAR(back, row.celsius, 0.01);
+  }
+  float ohms = 0.0F;
+  REQUIRE(NTC::ConvertTemperatureToResistanceDefault(85.0F, &ohms));
+  CHECK_NEAR(ohms, 1451.0, 1451.0 * 0.01); // Table 3 nominal, within the 1 % tolerance band
+}
+
+TEST_CASE("Steinhart-Hart validation accepts this part's fit and rejects nonsense") {
+  CHECK(NTC::ValidateSteinhartHartCoefficients(8.767633e-4F, 2.527899e-4F, 1.906681e-7F));
+  CHECK(!NTC::ValidateSteinhartHartCoefficients(8.767633e-4F, -2.5e-4F, 1.9e-7F));
+  CHECK(!NTC::ValidateSteinhartHartCoefficients(std::nanf(""), 2.5e-4F, 1.9e-7F));
+}

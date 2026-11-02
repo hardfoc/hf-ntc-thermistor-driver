@@ -17,12 +17,16 @@ constexpr float KELVIN_OFFSET_ =
     273.15F; ///< Celsius to Kelvin conversion offset
 constexpr float REFERENCE_TEMPERATURE_C_ =
     25.0F; ///< Reference temperature (25°C)
+// Default Steinhart-Hart coefficients: the TDK NTCG163JF103FT1S, fitted
+// exactly to the nominal resistances of its spec sheet's Table 3 at -40 C
+// (188.5 kOhm), 25 C (10.00 kOhm) and 125 C (0.534 kOhm). Within 0.2 C of
+// Table 3 from -40 C to +125 C and 0.41 C at +150 C.
 constexpr float STEINHART_HART_A_ =
-    1.129241e-3F; ///< Steinhart-Hart coefficient A
+    8.767633e-4F; ///< Steinhart-Hart coefficient A (1/K)
 constexpr float STEINHART_HART_B_ =
-    2.341077e-4F; ///< Steinhart-Hart coefficient B
+    2.527899e-4F; ///< Steinhart-Hart coefficient B (1/K)
 constexpr float STEINHART_HART_C_ =
-    8.775468e-8F; ///< Steinhart-Hart coefficient C
+    1.906681e-7F; ///< Steinhart-Hart coefficient C (1/K)
 
 // Validation limits
 constexpr float MIN_RESISTANCE_OHMS_ =
@@ -110,9 +114,9 @@ bool ConvertTemperatureToResistanceBeta(float temperature_celsius,
  *       accuracy, especially at temperature extremes.
  *
  * @param resistance_ohms Thermistor resistance (ohms)
- * @param coeff_a Steinhart-Hart coefficient A (typically ~1.129e-3)
- * @param coeff_b Steinhart-Hart coefficient B (typically ~2.341e-4)
- * @param coeff_c Steinhart-Hart coefficient C (typically ~8.775e-8)
+ * @param coeff_a Steinhart-Hart coefficient A (about 0.9e-3 for a 10 kOhm part)
+ * @param coeff_b Steinhart-Hart coefficient B (about 2.5e-4)
+ * @param coeff_c Steinhart-Hart coefficient C (about 1e-7 to 2e-7)
  * @param temperature_celsius Pointer to store temperature (°C)
  * @return true if successful, false otherwise
  *
@@ -124,6 +128,11 @@ bool ConvertResistanceToTemperatureSteinhartHart(
 
 /**
  * @brief Convert temperature to resistance using Steinhart-Hart equation
+ *
+ * Solves C*x^3 + B*x + (A - 1/T) = 0 for x = ln(R) exactly (the C term
+ * included), so it is the inverse of
+ * ConvertResistanceToTemperatureSteinhartHart().
+ *
  * @param temperature_celsius Temperature (°C)
  * @param coeff_a Steinhart-Hart coefficient A
  * @param coeff_b Steinhart-Hart coefficient B
@@ -138,6 +147,10 @@ bool ConvertTemperatureToResistanceSteinhartHart(
 /**
  * @brief Convert resistance to temperature using default Steinhart-Hart
  * coefficients
+ *
+ * The defaults (STEINHART_HART_A_/B_/C_) are fitted to the TDK
+ * NTCG163JF103FT1S; use ConvertResistanceToTemperatureSteinhartHart() with
+ * your own coefficients for any other part.
  * @param resistance_ohms Thermistor resistance (ohms)
  * @param temperature_celsius Pointer to store temperature (°C)
  * @return true if successful, false otherwise
@@ -238,6 +251,11 @@ bool ValidateBetaValue(float beta_value) noexcept;
 
 /**
  * @brief Validate Steinhart-Hart coefficients
+ *
+ * Accepts finite coefficients with |A| <= 1e-2, 1e-4 <= B <= 1e-3 and
+ * |C| <= 1e-6, which covers NTC fits from about 1 kOhm to 1 MOhm (this part's
+ * C is 1.9e-7).
+ *
  * @param coeff_a Coefficient A
  * @param coeff_b Coefficient B
  * @param coeff_c Coefficient C
@@ -266,6 +284,10 @@ bool CalculateBetaValue(float temp1_celsius, float resistance1_ohms,
 /**
  * @brief Calculate Steinhart-Hart coefficients from three
  * temperature-resistance pairs
+ *
+ * Solves 1/T = A + B*ln(R) + C*ln(R)^3 through the three points (in double
+ * precision), so the returned equation passes through all three. Pick points
+ * across the range you need, e.g. -40, 25 and 125 C from the datasheet table.
  * @param temp1_celsius First temperature (°C)
  * @param resistance1_ohms First resistance (ohms)
  * @param temp2_celsius Second temperature (°C)

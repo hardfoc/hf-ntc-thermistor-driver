@@ -6,6 +6,14 @@ code that used the affected API; together they call for a major version bump at 
 
 ## Unreleased
 
+### Breaking changes
+
+- **BREAKING (behaviour):** `NTC::Constants::STEINHART_HART_A_`, `_B_` and `_C_`, used by
+  `NTC::ConvertResistanceToTemperatureDefault()` and `NTC::ConvertTemperatureToResistanceDefault()`, are now
+  the NTCG163JF103FT1S fit through spec sheet Table 3 at −40 °C, 25 °C and 125 °C (0.8767633 × 10⁻³,
+  2.527899 × 10⁻⁴, 1.906681 × 10⁻⁷). The old generic values read 9.4 °C low at 85 °C for this part. Code that
+  relied on the old values for another thermistor must pass its own coefficients.
+
 ### Documentation
 
 - The documentation site moved to the HardFOC MkDocs platform: new page set (quickstart, hardware, conversion
@@ -22,6 +30,11 @@ code that used the affected API; together they call for a major version bump at 
   ones). The search and the validation follow the falling resistance of an NTC, and interpolation is linear in
   ln(R). `NtcConversionMethod::LookupTable` now reads the datasheet temperature at every row instead of falling
   back to the Beta equation.
+- Steinhart-Hart helpers: `NTC::CalculateSteinhartHartCoefficients()` solved the 3 × 3 system with a wrong
+  determinant (in float) and returned no usable fit; it now solves it in closed form in double precision.
+  `NTC::ValidateSteinhartHartCoefficients()` rejected C above 1 × 10⁻⁷, which excluded this part's fit
+  (C = 1.9 × 10⁻⁷); it now accepts |C| up to 1 × 10⁻⁶ and rejects non-finite values.
+  `NTC::ConvertTemperatureToResistanceSteinhartHart()` dropped the C term; it now solves the cubic exactly.
 
 ### Added
 
