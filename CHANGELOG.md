@@ -47,6 +47,9 @@ code that used the affected API; together they call for a major version bump at 
   error from the R25 and B tolerances, which reproduces the spec sheet's Table 3 Min/Max band (0.26 °C at
   25 °C, 1.1 °C at 85 °C) instead of a fixed-divisor approximation.
 
+- `GetNtcThermistorDriverVersion()` returned an empty string: the build settings never set
+  `HF_NTC_THERMISTOR_VERSION_STRING`, which `ntc_thermistor_version.h.in` uses. It now returns "1.0.0".
+
 ### Deprecated
 
 - `NTC::CalculateOptimalSeriesResistance(r25, t_min, t_max, &r)` and

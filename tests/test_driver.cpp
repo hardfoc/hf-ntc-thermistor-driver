@@ -9,6 +9,9 @@
 #include "ntc_conversion.hpp"
 #include "ntc_thermistor.hpp"
 
+#include <cstdio>
+#include <cstring>
+
 using Ntc = NtcThermistor<MockAdc>;
 
 namespace {
@@ -252,4 +255,11 @@ TEST_CASE("Free functions: Beta in both directions and B from two points") {
   float rt = 0.0F;
   REQUIRE(NTC::CalculateThermistorResistance(1.65F, 3.3F, 10000.0F, &rt));
   CHECK_NEAR(rt, 10000.0, 0.5);
+}
+
+TEST_CASE("Driver version string matches the version numbers") {
+  char expected[32];
+  std::snprintf(expected, sizeof(expected), "%d.%d.%d", HF_NTC_THERMISTOR_VERSION_MAJOR,
+                HF_NTC_THERMISTOR_VERSION_MINOR, HF_NTC_THERMISTOR_VERSION_PATCH);
+  CHECK(std::strcmp(GetNtcThermistorDriverVersion(), expected) == 0);
 }
