@@ -49,7 +49,7 @@ path is wrong. Your component then declares `REQUIRES hf_ntc_thermistor`.
 | Layer | File | Role |
 | --- | --- | --- |
 | Settings | [`cmake/hf_ntc_thermistor_build_settings.cmake`](../cmake/hf_ntc_thermistor_build_settings.cmake) | Sources, include directories, version: the single source of truth |
-| Library | [`CMakeLists.txt`](../CMakeLists.txt) | Static library for host builds and CI |
+| Library | [`CMakeLists.txt`](../CMakeLists.txt) | Static library, `install()` rules and the CMake package |
 | ESP-IDF | [`examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt`](../examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt) | IDF component wrapper over the same settings |
 
 The version is set once in the settings file and written into `ntc_thermistor_version.h` at configure time.
@@ -59,8 +59,24 @@ Read it at run time:
 const char* v = GetNtcThermistorDriverVersion();   // "1.0.0"
 ```
 
-The root `CMakeLists.txt` writes a package configuration but has no `install()` rules yet: use the driver with
-`add_subdirectory()` or the ESP-IDF component, not `find_package()`.
+## Install and `find_package()`
+
+The root `CMakeLists.txt` installs the library, the headers (with `src/ntc_thermistor.ipp`, which
+`ntc_thermistor.hpp` includes), the generated version header and a CMake package:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build --prefix /opt/hardfoc
+```
+
+```cmake
+find_package(hf_ntc_thermistor 1.0 REQUIRED)   # with /opt/hardfoc in CMAKE_PREFIX_PATH
+target_link_libraries(my_app PRIVATE hf::ntc_thermistor)
+```
+
+`hf::ntc_thermistor` is also defined as an alias by `add_subdirectory()`, so the same `target_link_libraries()`
+line works both ways. Headers install under `include/hf_ntc_thermistor/inc/`.
 
 ## Next
 

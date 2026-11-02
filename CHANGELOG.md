@@ -55,5 +55,10 @@ code that used the affected API; together they call for a major version bump at 
 
 ### Added
 
+- CMake `install()` rules: the library, the headers with `src/ntc_thermistor.ipp`, the generated version header
+  and an exported package, so `find_package(hf_ntc_thermistor)` and `hf::ntc_thermistor` work from an install
+  prefix. `hf::ntc_thermistor` is also an alias in the build tree. The package configuration no longer includes
+  the build-settings file, which was not installed.
+
 - Host unit tests (`HF_NTC_THERMISTOR_BUILD_TESTS`) that run the driver against a model of the ADC and divider
   and check readings against the NTCG163JF103FT1S resistance table.
