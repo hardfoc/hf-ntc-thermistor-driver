@@ -303,7 +303,9 @@ NtcThermistor<Esp32NtcAdc> thermistor(config, &adc);
 
 - [NTC Driver Documentation](../../README.md) - Complete driver documentation
 - [API Reference](../../docs/) - Detailed API documentation
-- [NTCG163JF103FT1S spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S) - TDK
+- [NTCG163JF103FT1S spec sheet][tdk-spec] - TDK
+
+[tdk-spec]: https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S
 
 ---
 

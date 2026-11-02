@@ -8,7 +8,7 @@ for the NTCG163JF103FT1S.
 ```mermaid
 flowchart LR
     A["ADC: V_NODE"] --> B["Divider: R = R_SERIES · V / (V_REF − V)"]
-    B --> C["Beta: 1/T = 1/T25 + ln(R/R25) / B"]
+    B --> C["Beta, or the datasheet table (LookupTable)"]
     C --> D["+ calibration_offset"]
     D --> E["EMA filter (optional)"]
     E --> F["min/max check"]
