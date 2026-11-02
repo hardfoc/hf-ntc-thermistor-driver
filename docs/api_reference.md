@@ -1,12 +1,3 @@
----
-layout: default
-title: "📖 API Reference"
-description: "Complete API reference for the NTC Thermistor driver"
-nav_order: 6
-parent: "📚 Documentation"
-permalink: /docs/api_reference/
----
-
 # API Reference
 
 Complete reference documentation for all public methods and types in the NTC Thermistor driver.

@@ -1,12 +1,3 @@
----
-layout: default
-title: "🔧 Platform Integration"
-description: "Implement the CRTP ADC interface for your platform"
-nav_order: 4
-parent: "📚 Documentation"
-permalink: /docs/platform_integration/
----
-
 # Platform Integration Guide
 
 This guide explains how to implement the hardware abstraction interface for the NTC Thermistor driver on your platform.
@@ -363,7 +354,7 @@ public:
 
 ## Common Pitfalls
 
-### ❌ Don't Use Virtual Functions
+### Don't Use Virtual Functions
 
 ```cpp
 // WRONG - defeats the purpose of CRTP
@@ -375,7 +366,7 @@ public:
 };
 ```
 
-### ✅ Correct CRTP Implementation
+### Correct CRTP Implementation
 
 ```cpp
 // CORRECT - no virtual keyword
@@ -387,7 +378,7 @@ public:
 };
 ```
 
-### ❌ Don't Forget the Template Parameter
+### Don't Forget the Template Parameter
 
 ```cpp
 // WRONG - missing template parameter
@@ -396,7 +387,7 @@ class MyAdc : public ntc::AdcInterface {  // ❌ Compiler error
 };
 ```
 
-### ✅ Correct Template Parameter
+### Correct Template Parameter
 
 ```cpp
 // CORRECT - pass your class as template parameter

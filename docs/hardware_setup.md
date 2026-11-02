@@ -1,12 +1,3 @@
----
-layout: default
-title: "🔌 Hardware Setup"
-description: "Hardware wiring and voltage divider circuit for NTC thermistor"
-nav_order: 3
-parent: "📚 Documentation"
-permalink: /docs/hardware_setup/
----
-
 # Hardware Setup
 
 ![NTC voltage-divider topology and resistance-temperature curve](assets/ntc-divider.svg)

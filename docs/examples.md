@@ -1,12 +1,3 @@
----
-layout: default
-title: "💡 Examples"
-description: "Complete example walkthroughs for the NTC Thermistor driver"
-nav_order: 7
-parent: "📚 Documentation"
-permalink: /docs/examples/
----
-
 # Examples
 
 This guide provides complete, working examples demonstrating various use cases for the NTC Thermistor driver.
