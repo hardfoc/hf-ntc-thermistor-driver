@@ -19,6 +19,7 @@ ctest --test-dir build-host --output-on-failure
 | File | Covers |
 | --- | --- |
 | [`tests/test_driver.cpp`](../tests/test_driver.cpp) | Initialisation, Beta accuracy against the table, errors, averaging, open and short, range, calibration, filter, free functions |
+| [`tests/test_conversion.cpp`](../tests/test_conversion.cpp) | The lookup table and the Steinhart-Hart helpers against every row of the datasheet table |
 | [`tests/mock_adc.hpp`](../tests/mock_adc.hpp) | The ADC and divider model |
 | [`tests/test_harness.hpp`](../tests/test_harness.hpp) | A small test registry and check macros |
 
@@ -44,5 +45,6 @@ The workflows call the shared, versioned workflows of
 
 ## On hardware
 
-The [ESP32 example](examples.md) runs over a simulated ADC. To check a real board, follow
-[Porting](porting.md#check-your-port): a precision resistor in place of the thermistor gives a known 25 °C.
+The [ESP32 example](examples.md) runs on the ESP32-C6's ADC; CI builds it but does not run it. To check a
+board, follow [Porting](porting.md#check-your-port): a precision resistor in place of the thermistor gives a
+known 25 °C.

@@ -2,7 +2,7 @@
 
 Run the driver on a new MCU by writing one class: the ADC interface.
 
-The driver never calls your SDK directly. It calls seven methods on a class you derive from
+The driver never calls your SDK directly. It calls seven methods, plus one optional hook, on a class you derive from
 `ntc::AdcInterface<Self>` (in [`inc/ntc_adc_interface.hpp`](../inc/ntc_adc_interface.hpp)). The base class uses
 CRTP: the calls are resolved at compile time, so there are no virtual functions, no vtable and nothing to
 allocate.
@@ -28,6 +28,7 @@ allocate.
 | `ReadChannelCount(channel, &count)` | One conversion, as the raw count. Used only by `GetRawAdcValue()` |
 | `GetReferenceVoltage() const` | The ADC's full-scale voltage. Not used by the driver today |
 | `GetResolutionBits() const` | The ADC's resolution. Not used by the driver today |
+| `DelayMs(ms)` (optional) | Wait at least `ms` milliseconds (an RTOS sleep). Used between averaged samples when `sample_delay_ms` is set; without it the samples are taken back to back |
 
 The read methods return `ntc::AdcError`: `Success`, or `NotInitialized`, `InvalidChannel`, `ReadFailed`,
 `Timeout`, `HardwareError`. The driver maps them to `NtcError` ([API guide](api-guide.md#handle-errors)).
@@ -49,11 +50,12 @@ Rules for `ReadChannelV()`:
 
 ## Reference implementation
 
-The ESP32 example's port, [`mock_esp32_adc.hpp`](../examples/esp32/main/mock_esp32_adc.hpp), is a simulated
-ADC: it returns a fixed mid-scale count and does not touch the hardware. It shows the shape of a port, not an
-ESP-IDF ADC driver. On ESP-IDF, implement `EnsureInitialized()` with `adc_oneshot_new_unit()`,
-`adc_oneshot_config_channel()` and an `adc_cali` scheme, and `ReadChannelV()` with `adc_oneshot_read()` and
-`adc_cali_raw_to_voltage()`.
+The ESP32 example's port, [`esp32_ntc_adc.hpp`](../examples/esp32/main/esp32_ntc_adc.hpp), is a complete
+ESP-IDF port. `EnsureInitialized()` creates the ADC1 unit with `adc_oneshot_new_unit()`, configures the channel
+at 12 dB attenuation (about 0 V to 3.3 V, the whole divider) with `adc_oneshot_config_channel()` and creates an
+`adc_cali` curve-fitting scheme (line fitting on chips without it). `ReadChannelV()` reads with
+`adc_oneshot_read()` and converts with `adc_cali_raw_to_voltage()`. `DelayMs()` sleeps with `vTaskDelay()`.
+Its component needs `REQUIRES esp_adc`.
 
 ## Check your port
 

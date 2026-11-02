@@ -59,6 +59,14 @@ public:
     return ntc::AdcError::Success;
   }
 
+  /// Optional delay hook: records the waits instead of sleeping.
+  void DelayMs(uint32_t ms) {
+    ++delay_calls;
+    delayed_ms += ms;
+  }
+  int delay_calls = 0;
+  uint32_t delayed_ms = 0;
+
   [[nodiscard]] float GetReferenceVoltage() const { return supply_v; }
   [[nodiscard]] uint8_t GetResolutionBits() const { return bits; }
 
@@ -83,4 +91,17 @@ private:
   }
 
   bool initialized_ = false;
+};
+
+/// The same model without the optional DelayMs() hook.
+class MockAdcNoDelay : public ntc::AdcInterface<MockAdcNoDelay> {
+public:
+  MockAdc inner;
+  [[nodiscard]] bool IsInitialized() const { return inner.IsInitialized(); }
+  bool EnsureInitialized() { return inner.EnsureInitialized(); }
+  [[nodiscard]] bool IsChannelAvailable(uint8_t channel) const { return inner.IsChannelAvailable(channel); }
+  ntc::AdcError ReadChannelV(uint8_t channel, float* voltage_v) { return inner.ReadChannelV(channel, voltage_v); }
+  ntc::AdcError ReadChannelCount(uint8_t channel, uint32_t* count) { return inner.ReadChannelCount(channel, count); }
+  [[nodiscard]] float GetReferenceVoltage() const { return inner.GetReferenceVoltage(); }
+  [[nodiscard]] uint8_t GetResolutionBits() const { return inner.GetResolutionBits(); }
 };

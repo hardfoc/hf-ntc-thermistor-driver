@@ -57,7 +57,7 @@ struct ADCConfig {
  */
 struct ThermistorSpecs {
     static constexpr float RESISTANCE_AT_25C = 10000.0f; ///< Nominal resistance at 25°C (Ω)
-    static constexpr float BETA_VALUE = 3950.0f;         ///< Beta coefficient (K)
+    static constexpr float BETA_VALUE = 3435.0f;         ///< B25/85 (K), TDK NTCG163JF103FT1S spec sheet, Table 2
     static constexpr float REFERENCE_TEMP_C = 25.0f;     ///< Reference temperature (°C)
     static constexpr float TOLERANCE_PERCENT = 1.0f;     ///< Resistance tolerance (%)
 };

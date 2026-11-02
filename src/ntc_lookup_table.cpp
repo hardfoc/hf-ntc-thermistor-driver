@@ -13,246 +13,98 @@ using NTC::ntc_lookup_entry_t;
 using NTC::ntc_lookup_table_t;
 
 //--------------------------------------
-//  NTCG163JFT103FT1S Lookup Table
+//  NTCG163JF103FT1S table data
 //--------------------------------------
 
-// Pre-calculated temperature-resistance pairs for NTCG163JFT103FT1S (10kΩ @
-// 25°C, β=3435K) Temperature range: -40°C to +125°C, step: 1°C
-static constexpr std::array<ntc_lookup_entry_t, 166> NTCG163JFT103FT1S_TABLE = {
-    {// -40°C to -30°C
-     {336.7F, -40.0F},
-     {312.1F, -39.0F},
-     {289.2F, -38.0F},
-     {267.9F, -37.0F},
-     {248.1F, -36.0F},
-     {229.8F, -35.0F},
-     {212.8F, -34.0F},
-     {197.1F, -33.0F},
-     {182.6F, -32.0F},
-     {169.2F, -31.0F},
-     {156.8F, -30.0F},
+// Nominal resistance-temperature characteristic of the TDK NTCG163JF103FT1S
+// (R25 = 10 kOhm +/- 1 %, B25/85 = 3435 K +/- 1 %), in ohms, from the TDK-EPC
+// spec sheet "NTCG163JF103FT1S", Table 3 "Resistance - Temperature
+// Characteristics" (Nom column, kOhm x 1000). -40 C to +150 C in 5 C steps.
+// Ordered by rising temperature, so the resistance falls along the table (NTC).
+static constexpr std::array<ntc_lookup_entry_t, 39> NTCG163JF103FT1S_TABLE = {{
+    {188500.0F, -40.0F},
+    {144300.0F, -35.0F},
+    {111300.0F, -30.0F},
+    {86600.0F, -25.0F},
+    {67800.0F, -20.0F},
+    {53460.0F, -15.0F},
+    {42450.0F, -10.0F},
+    {33930.0F, -5.0F},
+    {27280.0F, 0.0F},
+    {22070.0F, 5.0F},
+    {17960.0F, 10.0F},
+    {14700.0F, 15.0F},
+    {12090.0F, 20.0F},
+    {10000.0F, 25.0F},
+    {8310.0F, 30.0F},
+    {6940.0F, 35.0F},
+    {5826.0F, 40.0F},
+    {4911.0F, 45.0F},
+    {4158.0F, 50.0F},
+    {3536.0F, 55.0F},
+    {3019.0F, 60.0F},
+    {2588.0F, 65.0F},
+    {2227.0F, 70.0F},
+    {1924.0F, 75.0F},
+    {1668.0F, 80.0F},
+    {1451.0F, 85.0F},
+    {1267.0F, 90.0F},
+    {1110.0F, 95.0F},
+    {975.0F, 100.0F},
+    {860.0F, 105.0F},
+    {760.0F, 110.0F},
+    {674.0F, 115.0F},
+    {599.0F, 120.0F},
+    {534.0F, 125.0F},
+    {478.0F, 130.0F},
+    {428.0F, 135.0F},
+    {385.0F, 140.0F},
+    {346.0F, 145.0F},
+    {313.0F, 150.0F}}};
 
-     // -29°C to -20°C
-     {145.4F, -29.0F},
-     {134.9F, -28.0F},
-     {125.2F, -27.0F},
-     {116.2F, -26.0F},
-     {107.9F, -25.0F},
-     {100.2F, -24.0F},
-     {93.1F, -23.0F},
-     {86.5F, -22.0F},
-     {80.4F, -21.0F},
-     {74.8F, -20.0F},
+static constexpr float kTableMinResistance = 313.0F;    // at +150 C
+static constexpr float kTableMaxResistance = 188500.0F; // at -40 C
+static constexpr float kTableMinTemperature = -40.0F;
+static constexpr float kTableMaxTemperature = 150.0F;
 
-     // -19°C to -10°C
-     {69.6F, -19.0F},
-     {64.8F, -18.0F},
-     {60.4F, -17.0F},
-     {56.3F, -16.0F},
-     {52.6F, -15.0F},
-     {49.1F, -14.0F},
-     {45.9F, -13.0F},
-     {43.0F, -12.0F},
-     {40.3F, -11.0F},
-     {37.8F, -10.0F},
-
-     // -9°C to 0°C
-     {35.5F, -9.0F},
-     {33.4F, -8.0F},
-     {31.4F, -7.0F},
-     {29.6F, -6.0F},
-     {27.9F, -5.0F},
-     {26.3F, -4.0F},
-     {24.8F, -3.0F},
-     {23.4F, -2.0F},
-     {22.1F, -1.0F},
-     {20.9F, 0.0F},
-
-     // 1°C to 10°C
-     {19.8F, 1.0F},
-     {18.7F, 2.0F},
-     {17.7F, 3.0F},
-     {16.8F, 4.0F},
-     {15.9F, 5.0F},
-     {15.1F, 6.0F},
-     {14.3F, 7.0F},
-     {13.6F, 8.0F},
-     {12.9F, 9.0F},
-     {12.3F, 10.0F},
-
-     // 11°C to 20°C
-     {11.7F, 11.0F},
-     {11.1F, 12.0F},
-     {10.6F, 13.0F},
-     {10.1F, 14.0F},
-     {9.6F, 15.0F},
-     {9.2F, 16.0F},
-     {8.8F, 17.0F},
-     {8.4F, 18.0F},
-     {8.0F, 19.0F},
-     {7.7F, 20.0F},
-
-     // 21°C to 30°C
-     {7.4F, 21.0F},
-     {7.1F, 22.0F},
-     {6.8F, 23.0F},
-     {6.5F, 24.0F},
-     {6.3F, 25.0F},
-     {6.0F, 26.0F},
-     {5.8F, 27.0F},
-     {5.6F, 28.0F},
-     {5.4F, 29.0F},
-     {5.2F, 30.0F},
-
-     // 31°C to 40°C
-     {5.0F, 31.0F},
-     {4.8F, 32.0F},
-     {4.6F, 33.0F},
-     {4.4F, 34.0F},
-     {4.3F, 35.0F},
-     {4.1F, 36.0F},
-     {4.0F, 37.0F},
-     {3.8F, 38.0F},
-     {3.7F, 39.0F},
-     {3.6F, 40.0F},
-
-     // 41°C to 50°C
-     {3.4F, 41.0F},
-     {3.3F, 42.0F},
-     {3.2F, 43.0F},
-     {3.1F, 44.0F},
-     {3.0F, 45.0F},
-     {2.9F, 46.0F},
-     {2.8F, 47.0F},
-     {2.7F, 48.0F},
-     {2.6F, 49.0F},
-     {2.5F, 50.0F},
-
-     // 51°C to 60°C
-     {2.4F, 51.0F},
-     {2.3F, 52.0F},
-     {2.2F, 53.0F},
-     {2.1F, 54.0F},
-     {2.0F, 55.0F},
-     {1.9F, 56.0F},
-     {1.8F, 57.0F},
-     {1.7F, 58.0F},
-     {1.6F, 59.0F},
-     {1.5F, 60.0F},
-
-     // 61°C to 70°C
-     {1.4F, 61.0F},
-     {1.3F, 62.0F},
-     {1.2F, 63.0F},
-     {1.1F, 64.0F},
-     {1.0F, 65.0F},
-     {0.9F, 66.0F},
-     {0.8F, 67.0F},
-     {0.7F, 68.0F},
-     {0.6F, 69.0F},
-     {0.5F, 70.0F},
-
-     // 71°C to 80°C
-     {0.4F, 71.0F},
-     {0.3F, 72.0F},
-     {0.2F, 73.0F},
-     {0.1F, 74.0F},
-     {0.0F, 75.0F},
-     {-0.1F, 76.0F},
-     {-0.2F, 77.0F},
-     {-0.3F, 78.0F},
-     {-0.4F, 79.0F},
-     {-0.5F, 80.0F},
-
-     // 81°C to 90°C
-     {-0.6F, 81.0F},
-     {-0.7F, 82.0F},
-     {-0.8F, 83.0F},
-     {-0.9F, 84.0F},
-     {-1.0F, 85.0F},
-     {-1.1F, 86.0F},
-     {-1.2F, 87.0F},
-     {-1.3F, 88.0F},
-     {-1.4F, 89.0F},
-     {-1.5F, 90.0F},
-
-     // 91°C to 100°C
-     {-1.6F, 91.0F},
-     {-1.7F, 92.0F},
-     {-1.8F, 93.0F},
-     {-1.9F, 94.0F},
-     {-2.0F, 95.0F},
-     {-2.1F, 96.0F},
-     {-2.2F, 97.0F},
-     {-2.3F, 98.0F},
-     {-2.4F, 99.0F},
-     {-2.5F, 100.0F},
-
-     // 101°C to 110°C
-     {-2.6F, 101.0F},
-     {-2.7F, 102.0F},
-     {-2.8F, 103.0F},
-     {-2.9F, 104.0F},
-     {-3.0F, 105.0F},
-     {-3.1F, 106.0F},
-     {-3.2F, 107.0F},
-     {-3.3F, 108.0F},
-     {-3.4F, 109.0F},
-     {-3.5F, 110.0F},
-
-     // 111°C to 120°C
-     {-3.6F, 111.0F},
-     {-3.7F, 112.0F},
-     {-3.8F, 113.0F},
-     {-3.9F, 114.0F},
-     {-4.0F, 115.0F},
-     {-4.1F, 116.0F},
-     {-4.2F, 117.0F},
-     {-4.3F, 118.0F},
-     {-4.4F, 119.0F},
-     {-4.5F, 120.0F},
-
-     // 121°C to 125°C
-     {-4.6F, 121.0F},
-     {-4.7F, 122.0F},
-     {-4.8F, 123.0F},
-     {-4.9F, 124.0F},
-     {-5.0F, 125.0F}}};
+//--------------------------------------
+//  NTCG163JFT103FT1S Lookup Table (same values as NTCG163JF103FT1S)
+//--------------------------------------
 
 static const ntc_lookup_table_t NTCG163JFT103FT1S_LOOKUP_TABLE = {
-    .entries = NTCG163JFT103FT1S_TABLE.data(),
-    .entry_count = NTCG163JFT103FT1S_TABLE.size(),
-    .min_resistance = 0.0F, // Will be calculated
-    .max_resistance = 336.7F,
-    .min_temperature = -40.0F,
-    .max_temperature = 125.0F,
-    .resistance_step = 1.0F};
+    .entries = NTCG163JF103FT1S_TABLE.data(),
+    .entry_count = NTCG163JF103FT1S_TABLE.size(),
+    .min_resistance = kTableMinResistance,
+    .max_resistance = kTableMaxResistance,
+    .min_temperature = kTableMinTemperature,
+    .max_temperature = kTableMaxTemperature,
+    .resistance_step = 0.0F}; // not uniform in resistance; 5 C in temperature
 
 //--------------------------------------
-//  NTCG164JF103FT1S Lookup Table (same as NTCG163JFT103FT1S)
+//  NTCG164JF103FT1S Lookup Table (same values as NTCG163JF103FT1S)
 //--------------------------------------
 
 static const ntc_lookup_table_t NTCG164JF103FT1S_LOOKUP_TABLE = {
-    .entries = NTCG163JFT103FT1S_TABLE.data(), // Same table
-    .entry_count = NTCG163JFT103FT1S_TABLE.size(),
-    .min_resistance = 0.0F, // Will be calculated
-    .max_resistance = 336.7F,
-    .min_temperature = -40.0F,
-    .max_temperature = 125.0F,
-    .resistance_step = 1.0F};
+    .entries = NTCG163JF103FT1S_TABLE.data(), // Same table
+    .entry_count = NTCG163JF103FT1S_TABLE.size(),
+    .min_resistance = kTableMinResistance,
+    .max_resistance = kTableMaxResistance,
+    .min_temperature = kTableMinTemperature,
+    .max_temperature = kTableMaxTemperature,
+    .resistance_step = 0.0F};
 
 //--------------------------------------
-//  NTCG163JF103FT1S Lookup Table (same as NTCG163JFT103FT1S)
+//  NTCG163JF103FT1S Lookup Table
 //--------------------------------------
 
 static const ntc_lookup_table_t NTCG163JF103FT1S_LOOKUP_TABLE = {
-    .entries = NTCG163JFT103FT1S_TABLE.data(), // Same table
-    .entry_count = NTCG163JFT103FT1S_TABLE.size(),
-    .min_resistance = 0.0F, // Will be calculated
-    .max_resistance = 336.7F,
-    .min_temperature = -40.0F,
-    .max_temperature = 125.0F,
-    .resistance_step = 1.0F};
+    .entries = NTCG163JF103FT1S_TABLE.data(), // Same table
+    .entry_count = NTCG163JF103FT1S_TABLE.size(),
+    .min_resistance = kTableMinResistance,
+    .max_resistance = kTableMaxResistance,
+    .min_temperature = kTableMinTemperature,
+    .max_temperature = kTableMaxTemperature,
+    .resistance_step = 0.0F};
 
 //--------------------------------------
 //  Lookup Table Functions
@@ -285,12 +137,12 @@ bool FindTemperatureFromLookupTable(const ntc_lookup_table_t *table,
   }
 
   // Check if resistance is within table range
-  if (resistance_ohms < table->min_resistance ||
-      resistance_ohms > table->max_resistance) {
+  if (!(resistance_ohms >= table->min_resistance &&
+        resistance_ohms <= table->max_resistance)) {
     return false;
   }
 
-  // Find the two closest entries
+  // Find the two entries that bracket the resistance
   size_t lower_index = 0;
   size_t upper_index = 0;
   if (!BinarySearchLookupTable(table, resistance_ohms, &lower_index,
@@ -318,46 +170,35 @@ bool FindResistanceFromLookupTable(const ntc_lookup_table_t *table,
   }
 
   // Check if temperature is within table range
-  if (temperature_celsius < table->min_temperature ||
-      temperature_celsius > table->max_temperature) {
+  if (!(temperature_celsius >= table->min_temperature &&
+        temperature_celsius <= table->max_temperature)) {
     return false;
   }
 
-  // Find the two closest entries by temperature
-  size_t lower_index = 0;
-  size_t upper_index = 0;
-  bool found = false;
-
-  for (size_t i = 0; i < table->entry_count - 1; i++) {
-    if (table->entries[i].temperature_celsius <= temperature_celsius &&
-        table->entries[i + 1].temperature_celsius >= temperature_celsius) {
-      lower_index = i;
-      upper_index = i + 1;
-      found = true;
-      break;
+  // Entries are in rising temperature: find the pair that brackets it
+  for (size_t i = 0; i + 1 < table->entry_count; i++) {
+    const ntc_lookup_entry_t &entry1 = table->entries[i];
+    const ntc_lookup_entry_t &entry2 = table->entries[i + 1];
+    if (entry1.temperature_celsius <= temperature_celsius &&
+        temperature_celsius <= entry2.temperature_celsius) {
+      const float temp_diff =
+          entry2.temperature_celsius - entry1.temperature_celsius;
+      if (std::abs(temp_diff) < 1e-6F) {
+        *resistance_ohms = entry1.resistance_ohms;
+        return true;
+      }
+      // ln(R) is close to linear in temperature over one step (NTC
+      // characteristic), so interpolate ln(R) rather than R.
+      const float ratio =
+          (temperature_celsius - entry1.temperature_celsius) / temp_diff;
+      const float ln_r1 = std::log(entry1.resistance_ohms);
+      const float ln_r2 = std::log(entry2.resistance_ohms);
+      *resistance_ohms = std::exp(ln_r1 + (ratio * (ln_r2 - ln_r1)));
+      return true;
     }
   }
 
-  if (!found) {
-    return false;
-  }
-
-  // Interpolate between the two entries
-  const ntc_lookup_entry_t &entry1 = table->entries[lower_index];
-  const ntc_lookup_entry_t &entry2 = table->entries[upper_index];
-
-  float temp_diff = entry2.temperature_celsius - entry1.temperature_celsius;
-  if (std::abs(temp_diff) < 1e-6F) {
-    *resistance_ohms = entry1.resistance_ohms;
-    return true;
-  }
-
-  float ratio = (temperature_celsius - entry1.temperature_celsius) / temp_diff;
-  *resistance_ohms =
-      entry1.resistance_ohms +
-      (ratio * (entry2.resistance_ohms - entry1.resistance_ohms));
-
-  return true;
+  return false;
 }
 
 bool InterpolateLookupEntries(const ntc_lookup_entry_t &entry1,
@@ -368,13 +209,22 @@ bool InterpolateLookupEntries(const ntc_lookup_entry_t &entry1,
     return false;
   }
 
-  float resistance_diff = entry2.resistance_ohms - entry1.resistance_ohms;
-  if (std::abs(resistance_diff) < 1e-6F) {
+  if (resistance_ohms <= 0.0F || entry1.resistance_ohms <= 0.0F ||
+      entry2.resistance_ohms <= 0.0F) {
+    return false;
+  }
+
+  // Temperature is close to linear in ln(R) over one table step (NTC
+  // characteristic), so interpolate against ln(R) rather than R.
+  const float ln_r1 = std::log(entry1.resistance_ohms);
+  const float ln_r2 = std::log(entry2.resistance_ohms);
+  const float ln_diff = ln_r2 - ln_r1;
+  if (std::abs(ln_diff) < 1e-9F) {
     *temperature_celsius = entry1.temperature_celsius;
     return true;
   }
 
-  float ratio = (resistance_ohms - entry1.resistance_ohms) / resistance_diff;
+  const float ratio = (std::log(resistance_ohms) - ln_r1) / ln_diff;
   *temperature_celsius =
       entry1.temperature_celsius +
       (ratio * (entry2.temperature_celsius - entry1.temperature_celsius));
@@ -385,7 +235,8 @@ bool InterpolateLookupEntries(const ntc_lookup_entry_t &entry1,
 bool BinarySearchLookupTable(const ntc_lookup_table_t *table,
                              float resistance_ohms, size_t *lower_index,
                              size_t *upper_index) noexcept {
-  if (table == nullptr || lower_index == nullptr || upper_index == nullptr) {
+  if (table == nullptr || table->entries == nullptr ||
+      lower_index == nullptr || upper_index == nullptr) {
     return false;
   }
 
@@ -393,40 +244,28 @@ bool BinarySearchLookupTable(const ntc_lookup_table_t *table,
     return false;
   }
 
-  size_t left = 0;
-  size_t right = table->entry_count - 1;
+  // NTC: entries are in rising temperature, so resistance falls along the
+  // table. Bracket the target: entries[lo] >= R >= entries[lo + 1].
+  const ntc_lookup_entry_t *entries = table->entries;
+  const size_t last = table->entry_count - 1;
+  if (!(resistance_ohms <= entries[0].resistance_ohms &&
+        resistance_ohms >= entries[last].resistance_ohms)) {
+    return false; // outside the table (or NaN)
+  }
 
-  // Binary search for the closest resistance value
-  while (left <= right) {
-    size_t mid = left + ((right - left) / 2);
-    float mid_resistance = table->entries[mid].resistance_ohms;
-
-    if (std::abs(mid_resistance - resistance_ohms) < 1e-6F) {
-      // Exact match
-      *lower_index = mid;
-      *upper_index = mid;
-      return true;
-    }
-
-    if (mid_resistance < resistance_ohms) {
-      left = mid + 1;
+  size_t lo = 0;
+  size_t hi = last;
+  while (hi - lo > 1) {
+    const size_t mid = lo + ((hi - lo) / 2);
+    if (entries[mid].resistance_ohms >= resistance_ohms) {
+      lo = mid;
     } else {
-      right = mid - 1;
+      hi = mid;
     }
   }
 
-  // Find the two closest entries
-  if (right >= table->entry_count - 1) {
-    *lower_index = table->entry_count - 2;
-    *upper_index = table->entry_count - 1;
-  } else if (left == 0) {
-    *lower_index = 0;
-    *upper_index = 1;
-  } else {
-    *lower_index = right;
-    *upper_index = left;
-  }
-
+  *lower_index = lo;
+  *upper_index = hi;
   return true;
 }
 
@@ -443,12 +282,17 @@ bool ValidateLookupTable(const ntc_lookup_table_t *table) noexcept {
     return false;
   }
 
-  // Check that entries are sorted by resistance (descending for NTC)
+  // NTC: temperature rises and resistance falls along the table
   for (size_t i = 1; i < table->entry_count; i++) {
-    if (table->entries[i].resistance_ohms >=
-        table->entries[i - 1].resistance_ohms) {
+    if (!(table->entries[i].resistance_ohms <
+          table->entries[i - 1].resistance_ohms) ||
+        !(table->entries[i].temperature_celsius >
+          table->entries[i - 1].temperature_celsius)) {
       return false;
     }
+  }
+  if (!(table->entries[table->entry_count - 1].resistance_ohms > 0.0F)) {
+    return false;
   }
 
   return true;

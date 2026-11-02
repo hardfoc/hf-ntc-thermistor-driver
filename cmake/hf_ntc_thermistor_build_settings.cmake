@@ -16,6 +16,7 @@ set(HF_NTC_THERMISTOR_VERSION_MAJOR 1)
 set(HF_NTC_THERMISTOR_VERSION_MINOR 0)
 set(HF_NTC_THERMISTOR_VERSION_PATCH 0)
 set(HF_NTC_THERMISTOR_VERSION "${HF_NTC_THERMISTOR_VERSION_MAJOR}.${HF_NTC_THERMISTOR_VERSION_MINOR}.${HF_NTC_THERMISTOR_VERSION_PATCH}")
+set(HF_NTC_THERMISTOR_VERSION_STRING "${HF_NTC_THERMISTOR_VERSION}")  # used by ntc_thermistor_version.h.in
 
 #===============================================================================
 # Generate version header from template (into build directory)

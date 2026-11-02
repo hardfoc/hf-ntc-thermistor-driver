@@ -69,6 +69,7 @@ set(MAIN_INCLUDE_DIRS
 # Define required ESP-IDF components for the main application
 set(MAIN_REQUIRES
     driver              # ESP-IDF driver framework
+    esp_adc             # ADC oneshot driver and calibration (Esp32NtcAdc)
     esp_timer           # ESP-IDF timer functionality
     freertos            # FreeRTOS for threading and synchronization
     hf_ntc_thermistor    # NTC Thermistor driver component

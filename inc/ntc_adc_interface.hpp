@@ -39,8 +39,16 @@ enum class AdcError : uint8_t {
  *   bool IsInitialized() const { ... }
  *   bool EnsureInitialized() { ... }
  *   // ... implement other methods
+ *   void DelayMs(uint32_t ms) { vTaskDelay(pdMS_TO_TICKS(ms)); }  // optional
  * };
  * @endcode
+ *
+ * Optional hook: `void DelayMs(uint32_t ms)` in the derived class. When the
+ * port provides it, the driver waits `sample_delay_ms` between averaged
+ * samples through it (an RTOS sleep or a timed busy-wait). A port without it
+ * takes the samples back to back and `sample_delay_ms` has no effect. The hook
+ * is detected at compile time; it is deliberately not declared in this base
+ * class.
  *
  * @tparam Derived The derived class type (CRTP pattern)
  */

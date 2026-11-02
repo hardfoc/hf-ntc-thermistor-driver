@@ -15,6 +15,7 @@
 // Platform hooks: your SDK's calls. Declared only, so the docs build checks the port compiles.
 bool platform_adc_init() noexcept;                                         // unit, attenuation, calibration
 bool platform_adc_read(uint8_t channel, uint32_t& raw, uint32_t& mv) noexcept;  // one conversion, calibrated
+void platform_delay_ms(uint32_t ms) noexcept;                                   // RTOS sleep (vTaskDelay, k_msleep)
 
 // --8<-- [start:port]
 class MyAdc : public ntc::AdcInterface<MyAdc> {
@@ -53,6 +54,9 @@ public:
 
   [[nodiscard]] float GetReferenceVoltage() const { return kFullScaleV; }
   [[nodiscard]] uint8_t GetResolutionBits() const { return kBits; }
+
+  // Optional: the driver waits sample_delay_ms between averaged samples through this.
+  void DelayMs(uint32_t ms) { platform_delay_ms(ms); }
 
 private:
   ntc::AdcError read(uint8_t channel, uint32_t* raw, uint32_t* mv) {

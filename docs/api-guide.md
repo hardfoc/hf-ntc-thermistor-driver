@@ -63,10 +63,11 @@ samples. `timestamp_us` is always 0 and `accuracy_celsius` always 0.5; fill in y
 | Setting | Effect | Cost |
 | --- | --- | --- |
 | `sample_count` | Averages that many ADC reads; failed reads are skipped | `sample_count` reads per call |
-| `sample_delay_ms` | A busy-wait loop between samples, not a timed delay | CPU time, length depends on the MCU |
+| `sample_delay_ms` | A wait between samples through the port's `DelayMs()` ([Porting](porting.md#what-you-implement)); none if the port has no `DelayMs()` | The call blocks `(sample_count − 1) × sample_delay_ms` |
 | `enable_filtering`, `filter_alpha` | EMA after calibration: new = α · reading + (1 − α) · previous | None; the first reading seeds it |
 
-Prefer `sample_delay_ms = 0` and space your calls with your RTOS. A smaller α smooths more and responds more
+`sample_delay_ms` blocks the calling task for the whole wait; leave it 0 unless the samples must be spread
+out, and give the port a `DelayMs()` that sleeps rather than spins. A smaller α smooths more and responds more
 slowly; changing the filter or the configuration resets it.
 
 ## Calibrate
@@ -75,8 +76,9 @@ slowly; changing the filter or the configuration resets it.
 --8<-- "tests/docs/api_tasks.cpp:calibrate"
 ```
 
-`Calibrate(t)` reads the sensor and sets the offset to `t − reading`. The reading already includes the current
-offset, so call `ResetCalibration()` first, as above. The offset is a constant: it corrects R25 tolerance and
+`Calibrate(t)` reads the sensor, with the current offset applied, and adds `t − reading` to the offset, so the
+sensor then reads `t` whatever offset was set before. `ResetCalibration()` first is optional; it starts from
+zero, as above. The offset is a constant: it corrects R25 tolerance and
 divider errors well, and the Beta equation's error only near the calibration temperature
 ([Conversion methods](conversion.md)). The offset lives in RAM; store it yourself.
 

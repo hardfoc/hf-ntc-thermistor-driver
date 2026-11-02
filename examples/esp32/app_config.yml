@@ -21,7 +21,7 @@ apps:
   # Comprehensive Test Suite
   # --------------------------------------------------------------------------
   ntc_thermistor_comprehensive_test:
-    description: "Driver initialisation test over a simulated ADC, with a pass / fail summary"
+    description: "Driver test on the real ESP32-C6 ADC (adc_oneshot + adc_cali), with a pass / fail summary"
     source_file: "ntc_thermistor_comprehensive_test.cpp"
     category: "test"
     idf_versions: ["release/v5.5"]

@@ -9,6 +9,9 @@
 #include "ntc_conversion.hpp"
 #include "ntc_thermistor.hpp"
 
+#include <cstdio>
+#include <cstring>
+
 using Ntc = NtcThermistor<MockAdc>;
 
 namespace {
@@ -113,6 +116,34 @@ TEST_CASE("Averaging reads the ADC sample_count times and skips failed samples")
   CHECK(ntc.SetSamplingParameters(0, 0) == NtcError::InvalidParameter);
 }
 
+TEST_CASE("sample_delay_ms waits between samples through the port's DelayMs()") {
+  MockAdc adc;
+  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetSamplingParameters(4, 5) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_EQ(adc.delay_calls, 3); // between samples, not after the last
+  CHECK_EQ(adc.delayed_ms, 15U);
+  uint32_t raw = 0;
+  REQUIRE(ntc.GetRawAdcValue(&raw) == NtcError::Success);
+  CHECK_EQ(adc.delay_calls, 6);
+  REQUIRE(ntc.SetSamplingParameters(4, 0) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_EQ(adc.delay_calls, 6); // no delay configured: no calls
+}
+
+TEST_CASE("A port without DelayMs() still averages, back to back") {
+  MockAdcNoDelay adc;
+  NtcThermistor<MockAdcNoDelay> ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetSamplingParameters(4, 5) == NtcError::Success);
+  adc.inner.thermistor_ohms = kR_25C;
+  float t = 0.0F;
+  REQUIRE(ntc.ReadTemperatureCelsius(&t) == NtcError::Success);
+  CHECK_NEAR(t, 25.0, 0.05);
+  CHECK_EQ(adc.inner.voltage_reads, 4);
+}
+
 TEST_CASE("Open and shorted thermistors fail the conversion") {
   MockAdc adc;
   Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
@@ -146,6 +177,22 @@ TEST_CASE("Calibration offset is added to every reading") {
   CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
 }
 
+TEST_CASE("Calibrate adds the correction to an existing offset") {
+  MockAdc adc;
+  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetCalibrationOffset(1.5F) == NtcError::Success);
+  adc.thermistor_ohms = kR_25C; // reads 26.5 C with the offset
+  REQUIRE(ntc.Calibrate(24.0F) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
+  float offset = 0.0F;
+  REQUIRE(ntc.GetCalibrationOffset(&offset) == NtcError::Success);
+  CHECK_NEAR(offset, -1.0, 0.05); // 1.5 + (24.0 - 26.5)
+  // Calibrating again at the same point changes nothing.
+  REQUIRE(ntc.Calibrate(24.0F) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 24.0, 0.05);
+}
+
 TEST_CASE("Filtering is an exponential moving average seeded by the first reading") {
   MockAdc adc;
   Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
@@ -172,12 +219,30 @@ TEST_CASE("ReadTemperature fills every unit, the resistance and the raw count") 
   CHECK_EQ(r.adc_raw_value, 2048U);
 }
 
-TEST_CASE("LookupTable falls back to the Beta model for a 10 kOhm reading") {
+TEST_CASE("LookupTable reads the datasheet temperatures where Beta is off") {
   MockAdc adc;
-  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  ntc_config_t cfg = GetDefaultNtcConfig();
+  cfg.conversion_method = NtcConversionMethod::LookupTable;
+  cfg.min_temperature = -40.5F;
+  cfg.max_temperature = 150.0F;
+  Ntc ntc(cfg, &adc);
   REQUIRE(ntc.Initialize());
-  REQUIRE(ntc.SetConversionMethod(NtcConversionMethod::LookupTable) == NtcError::Success);
   CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_NEAR(readAt(ntc, adc, kR_0C), 0.0, 0.05);     // Beta reads +1.1 C
+  CHECK_NEAR(readAt(ntc, adc, kR_125C), 125.0, 0.05); // Beta reads +1.7 C
+  CHECK_NEAR(readAt(ntc, adc, kR_m40C), -40.0, 0.05); // Beta reads +4.4 C
+}
+
+TEST_CASE("LookupTable falls back to the Beta model outside the table") {
+  MockAdc adc;
+  ntc_config_t cfg = GetDefaultNtcConfig();
+  cfg.conversion_method = NtcConversionMethod::LookupTable;
+  cfg.min_temperature = -60.0F;
+  Ntc ntc(cfg, &adc);
+  REQUIRE(ntc.Initialize());
+  float beta_c = 0.0F;
+  REQUIRE(NTC::ConvertResistanceToTemperatureBeta(250000.0F, 10000.0F, 3435.0F, &beta_c));
+  CHECK_NEAR(readAt(ntc, adc, 250000.0F), beta_c, 0.05); // above the -40 C row
 }
 
 TEST_CASE("Free functions: Beta in both directions and B from two points") {
@@ -190,4 +255,11 @@ TEST_CASE("Free functions: Beta in both directions and B from two points") {
   float rt = 0.0F;
   REQUIRE(NTC::CalculateThermistorResistance(1.65F, 3.3F, 10000.0F, &rt));
   CHECK_NEAR(rt, 10000.0, 0.5);
+}
+
+TEST_CASE("Driver version string matches the version numbers") {
+  char expected[32];
+  std::snprintf(expected, sizeof(expected), "%d.%d.%d", HF_NTC_THERMISTOR_VERSION_MAJOR,
+                HF_NTC_THERMISTOR_VERSION_MINOR, HF_NTC_THERMISTOR_VERSION_PATCH);
+  CHECK(std::strcmp(GetNtcThermistorDriverVersion(), expected) == 0);
 }

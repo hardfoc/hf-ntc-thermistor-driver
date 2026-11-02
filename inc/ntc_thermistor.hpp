@@ -239,6 +239,11 @@ public:
 
   /**
    * @brief Calibrate the thermistor
+   *
+   * Takes a reading (current offset applied) and adds
+   * (reference - reading) to the offset, so afterwards the sensor reads the
+   * reference temperature whatever offset was set before.
+   *
    * @param reference_temperature_celsius Known reference temperature
    * @return Error code
    */
@@ -306,7 +311,8 @@ public:
   /**
    * @brief Set sampling parameters
    * @param sample_count Number of samples
-   * @param sample_delay_ms Delay between samples (ms)
+   * @param sample_delay_ms Delay between samples (ms), waited through the
+   *        port's optional DelayMs(); ignored by a port without one
    * @return Error code
    */
   NtcError SetSamplingParameters(uint32_t sample_count,
@@ -446,6 +452,12 @@ private:
    * @return Filtered temperature
    */
   float applyFiltering(float new_temperature) noexcept;
+
+  /**
+   * @brief Wait sample_delay_ms between two samples through the port's
+   *        optional DelayMs() hook (no wait if the port has none)
+   */
+  void delayBetweenSamples() noexcept;
 
   /**
    * @brief Initialize configuration for NTC type

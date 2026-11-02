@@ -13,6 +13,7 @@
 add_executable(hf_ntc_thermistor_host_tests
   test_main.cpp
   test_driver.cpp
+  test_conversion.cpp
 )
 
 target_link_libraries(hf_ntc_thermistor_host_tests PRIVATE ${HF_NTC_THERMISTOR_TARGET_NAME})
