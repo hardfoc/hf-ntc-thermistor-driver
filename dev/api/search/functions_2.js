@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['calculatebetavalue_0',['CalculateBetaValue',['../namespace_n_t_c.html#a3aa1c0b7798e904490f700199d6beabb',1,'NTC']]],
+  ['calculateoptimalseriesresistance_1',['CalculateOptimalSeriesResistance',['../namespace_n_t_c.html#a260a070fbec159b99ca6cb53b94c4bab',1,'NTC']]],
+  ['calculatesteinharthartcoefficients_2',['CalculateSteinhartHartCoefficients',['../namespace_n_t_c.html#ae5bf0e39d8f221537e40dd49da8e6648',1,'NTC']]],
+  ['calculatetemperatureaccuracy_3',['CalculateTemperatureAccuracy',['../namespace_n_t_c.html#aba47c745aa859f4d61c17aa771400c19',1,'NTC']]],
+  ['calculatethermistorresistance_4',['CalculateThermistorResistance',['../namespace_n_t_c.html#a3dba5bc1207f378228c44251ebe2c0b1',1,'NTC']]],
+  ['calculatethermistorvoltage_5',['CalculateThermistorVoltage',['../namespace_n_t_c.html#a49a98f22f74a9627322087ff8696aaad',1,'NTC']]],
+  ['calculatevoltagedividerratio_6',['CalculateVoltageDividerRatio',['../namespace_n_t_c.html#a404bd477b5a2f7ae77570a0f28aa5a9e',1,'NTC']]],
+  ['calibrate_7',['Calibrate',['../class_ntc_thermistor.html#aff226e4010c830261a9f1eab84beb302',1,'NtcThermistor']]],
+  ['celsiustofahrenheit_8',['CelsiusToFahrenheit',['../class_ntc_thermistor.html#a9f1c76053ef3029a40a5aa25f2687105',1,'NtcThermistor']]],
+  ['celsiustokelvin_9',['CelsiusToKelvin',['../class_ntc_thermistor.html#a3fe4d28a0ba0c7b59dfea1aa0d80a4bb',1,'NtcThermistor']]],
+  ['convertresistancetotemperaturebeta_10',['ConvertResistanceToTemperatureBeta',['../namespace_n_t_c.html#a2241358b1f0b0a19e1b59bf7e55298a8',1,'NTC']]],
+  ['convertresistancetotemperaturedefault_11',['ConvertResistanceToTemperatureDefault',['../namespace_n_t_c.html#a8cca1b35b9d4de92cb2388323033bcd1',1,'NTC']]],
+  ['convertresistancetotemperaturesteinharthart_12',['ConvertResistanceToTemperatureSteinhartHart',['../namespace_n_t_c.html#aa1785d9467faa154b30d4d3710ca12b9',1,'NTC']]],
+  ['converttemperaturetoresistancebeta_13',['ConvertTemperatureToResistanceBeta',['../namespace_n_t_c.html#af49c71b1b1bef9c63600d16f6af7a7b7',1,'NTC']]],
+  ['converttemperaturetoresistancedefault_14',['ConvertTemperatureToResistanceDefault',['../namespace_n_t_c.html#aa922d3f7ff526eac78cd1bc3a1fffb25',1,'NTC']]],
+  ['converttemperaturetoresistancesteinharthart_15',['ConvertTemperatureToResistanceSteinhartHart',['../namespace_n_t_c.html#a409b9386c346fdac5dbf35602763bc0b',1,'NTC']]]
+];
