@@ -113,6 +113,34 @@ TEST_CASE("Averaging reads the ADC sample_count times and skips failed samples")
   CHECK(ntc.SetSamplingParameters(0, 0) == NtcError::InvalidParameter);
 }
 
+TEST_CASE("sample_delay_ms waits between samples through the port's DelayMs()") {
+  MockAdc adc;
+  Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetSamplingParameters(4, 5) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_EQ(adc.delay_calls, 3); // between samples, not after the last
+  CHECK_EQ(adc.delayed_ms, 15U);
+  uint32_t raw = 0;
+  REQUIRE(ntc.GetRawAdcValue(&raw) == NtcError::Success);
+  CHECK_EQ(adc.delay_calls, 6);
+  REQUIRE(ntc.SetSamplingParameters(4, 0) == NtcError::Success);
+  CHECK_NEAR(readAt(ntc, adc, kR_25C), 25.0, 0.05);
+  CHECK_EQ(adc.delay_calls, 6); // no delay configured: no calls
+}
+
+TEST_CASE("A port without DelayMs() still averages, back to back") {
+  MockAdcNoDelay adc;
+  NtcThermistor<MockAdcNoDelay> ntc(NtcType::NtcG163Jf103Ft1S, &adc);
+  REQUIRE(ntc.Initialize());
+  REQUIRE(ntc.SetSamplingParameters(4, 5) == NtcError::Success);
+  adc.inner.thermistor_ohms = kR_25C;
+  float t = 0.0F;
+  REQUIRE(ntc.ReadTemperatureCelsius(&t) == NtcError::Success);
+  CHECK_NEAR(t, 25.0, 0.05);
+  CHECK_EQ(adc.inner.voltage_reads, 4);
+}
+
 TEST_CASE("Open and shorted thermistors fail the conversion") {
   MockAdc adc;
   Ntc ntc(NtcType::NtcG163Jf103Ft1S, &adc);

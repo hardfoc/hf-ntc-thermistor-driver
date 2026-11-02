@@ -26,7 +26,6 @@ using NTC::Constants::CELSIUS_TO_FAHRENHEIT_MULTIPLIER_;
 using NTC::Constants::FAHRENHEIT_OFFSET_;
 using NTC::Constants::FAHRENHEIT_TO_CELSIUS_MULTIPLIER_;
 using NTC::Constants::KELVIN_OFFSET_;
-using NTC::Constants::MILLISECONDS_PER_SECOND_;
 using NTC::Constants::ONE_FLOAT_;
 using NTC::Constants::ZERO_FLOAT_;
 
@@ -349,15 +348,8 @@ NtcError NtcThermistor<AdcType>::GetRawAdcValue(uint32_t *adc_value) noexcept {
         successful_samples++;
       }
 
-      // Simple delay loop if delay is configured (not accurate but
-      // hardware-agnostic)
-      if (config_.sample_delay_ms > 0 && i < config_.sample_count - 1) {
-        // Simple busy-wait delay (approximate)
-        uint32_t delay_count = config_.sample_delay_ms *
-                               static_cast<uint32_t>(MILLISECONDS_PER_SECOND_);
-        while (delay_count > 0) {
-          --delay_count;  // not volatile: avoids deprecated 'volatile' decrement
-        }
+      if (i + 1 < config_.sample_count) {
+        delayBetweenSamples();
       }
     }
 
@@ -682,15 +674,8 @@ NtcError NtcThermistor<AdcType>::readAdcVoltage(float *voltage_volts) noexcept {
         successful_samples++;
       }
 
-      // Simple delay loop if delay is configured (not accurate but
-      // hardware-agnostic)
-      if (config_.sample_delay_ms > 0 && i < config_.sample_count - 1) {
-        // Simple busy-wait delay (approximate)
-        uint32_t delay_count = config_.sample_delay_ms *
-                               static_cast<uint32_t>(MILLISECONDS_PER_SECOND_);
-        while (delay_count > 0) {
-          --delay_count;  // not volatile: avoids deprecated 'volatile' decrement
-        }
+      if (i + 1 < config_.sample_count) {
+        delayBetweenSamples();
       }
     }
 
@@ -762,6 +747,18 @@ NtcError NtcThermistor<AdcType>::convertResistanceToTemperature(
   }
 
   return NtcError::Success;
+}
+
+template <typename AdcType>
+void NtcThermistor<AdcType>::delayBetweenSamples() noexcept {
+  if (config_.sample_delay_ms == 0U || adc_interface_ == nullptr) {
+    return;
+  }
+  // Optional port hook, detected at compile time: an RTOS sleep or a timed
+  // wait. Without it the samples are taken back to back.
+  if constexpr (requires(AdcType &adc, uint32_t ms) { adc.DelayMs(ms); }) {
+    adc_interface_->DelayMs(config_.sample_delay_ms);
+  }
 }
 
 template <typename AdcType>

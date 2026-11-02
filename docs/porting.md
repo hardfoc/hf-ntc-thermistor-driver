@@ -2,7 +2,7 @@
 
 Run the driver on a new MCU by writing one class: the ADC interface.
 
-The driver never calls your SDK directly. It calls seven methods on a class you derive from
+The driver never calls your SDK directly. It calls seven methods, plus one optional hook, on a class you derive from
 `ntc::AdcInterface<Self>` (in [`inc/ntc_adc_interface.hpp`](../inc/ntc_adc_interface.hpp)). The base class uses
 CRTP: the calls are resolved at compile time, so there are no virtual functions, no vtable and nothing to
 allocate.
@@ -28,6 +28,7 @@ allocate.
 | `ReadChannelCount(channel, &count)` | One conversion, as the raw count. Used only by `GetRawAdcValue()` |
 | `GetReferenceVoltage() const` | The ADC's full-scale voltage. Not used by the driver today |
 | `GetResolutionBits() const` | The ADC's resolution. Not used by the driver today |
+| `DelayMs(ms)` (optional) | Wait at least `ms` milliseconds (an RTOS sleep). Used between averaged samples when `sample_delay_ms` is set; without it the samples are taken back to back |
 
 The read methods return `ntc::AdcError`: `Success`, or `NotInitialized`, `InvalidChannel`, `ReadFailed`,
 `Timeout`, `HardwareError`. The driver maps them to `NtcError` ([API guide](api-guide.md#handle-errors)).

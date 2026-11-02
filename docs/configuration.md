@@ -46,7 +46,8 @@ and B. Change any field before construction, or with `SetConfiguration()` afterw
 :   The channel number passed to your port. `SetAdcChannel()` asks the port's `IsChannelAvailable()` first.
 
 `sample_count`, `sample_delay_ms`
-:   Reads averaged per conversion, and a busy-wait between them ([API guide](api-guide.md#smooth)).
+:   Reads averaged per conversion, and the wait between them through the port's optional `DelayMs()`
+    ([API guide](api-guide.md#smooth)).
 
 `min_temperature`, `max_temperature`
 :   A reading outside this window returns `TemperatureOutOfRange`. Set it to what is physically possible for

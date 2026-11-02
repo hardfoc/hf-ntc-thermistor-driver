@@ -39,6 +39,9 @@ code that used the affected API; together they call for a major version bump at 
   offset, so calibrating with a non-zero offset left the sensor off by that offset. It now adds the correction
   to the existing offset. Calling `ResetCalibration()` first, as the docs advised, gives the same result as
   before.
+- `sample_delay_ms` was a busy-wait loop that the compiler could remove, so it waited an unknown time or none.
+  The driver now waits through an optional `DelayMs(uint32_t ms)` hook on the ADC port, detected at compile
+  time; a port without it takes the samples back to back. Existing ports compile unchanged.
 
 ### Added
 

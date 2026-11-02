@@ -63,10 +63,11 @@ samples. `timestamp_us` is always 0 and `accuracy_celsius` always 0.5; fill in y
 | Setting | Effect | Cost |
 | --- | --- | --- |
 | `sample_count` | Averages that many ADC reads; failed reads are skipped | `sample_count` reads per call |
-| `sample_delay_ms` | A busy-wait loop between samples, not a timed delay | CPU time, length depends on the MCU |
+| `sample_delay_ms` | A wait between samples through the port's `DelayMs()` ([Porting](porting.md#what-you-implement)); none if the port has no `DelayMs()` | The call blocks `(sample_count − 1) × sample_delay_ms` |
 | `enable_filtering`, `filter_alpha` | EMA after calibration: new = α · reading + (1 − α) · previous | None; the first reading seeds it |
 
-Prefer `sample_delay_ms = 0` and space your calls with your RTOS. A smaller α smooths more and responds more
+`sample_delay_ms` blocks the calling task for the whole wait; leave it 0 unless the samples must be spread
+out, and give the port a `DelayMs()` that sleeps rather than spins. A smaller α smooths more and responds more
 slowly; changing the filter or the configuration resets it.
 
 ## Calibrate
