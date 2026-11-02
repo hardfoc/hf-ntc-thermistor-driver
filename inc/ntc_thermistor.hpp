@@ -35,7 +35,7 @@
  *
  * @note The driver requires an ADC type that implements ntc::AdcInterface
  *
- * @example Basic Usage
+ * @par Basic usage
  * @code
  * // Define your ADC implementation
  * class MyAdc : public ntc::AdcInterface<MyAdc> {
@@ -47,24 +47,24 @@
  *
  * // Create ADC instance
  * MyAdc my_adc;
- * my_adc.Initialize();
+ * my_adc.EnsureInitialized();
  * // Create NTC thermistor with default configuration
- * NtcThermistor<MyAdc> thermistor(NTC_TYPE_NTCG163JFT103FT1S, &my_adc);
+ * NtcThermistor<MyAdc> thermistor(NtcType::NtcG163Jf103Ft1S, &my_adc);
  * // Initialize and read temperature
  *if (thermistor.Initialize()) {
  * float temp_c;
- * if (thermistor.ReadTemperatureCelsius(&temp_c) == NTC_SUCCESS) {
+ * if (thermistor.ReadTemperatureCelsius(&temp_c) == NtcError::Success) {
  * printf("Temperature: %.2F°C\n", temp_c);
  * }
  * }
  * @endcode
- * @example Custom Configuration
+ * @par Custom configuration
  * @code
  * // Create custom configuration
  * ntc_config_t config = GetDefaultNtcG163Jft103Ft1SConfig();
  * config.adc_channel = 1;
  * config.series_resistance = 10000.0F;
- * config.conversion_method = NTC_CONVERSION_MATHEMATICAL;
+ * config.conversion_method = NtcConversionMethod::Mathematical;
  * config.enable_filtering = true;
  * config.filter_alpha = 0.1F;
  *
@@ -85,7 +85,7 @@ public:
    * specified NTC type. The configuration is automatically initialized with
    * appropriate values for the thermistor type.
    *
-   * @param ntc_type NTC thermistor type (e.g., NTC_TYPE_NTCG163JFT103FT1S)
+   * @param ntc_type NTC thermistor type (e.g., NtcType::NtcG163Jf103Ft1S)
    * @param adc_interface Pointer to ADC interface (must inherit from
    * ntc::AdcInterface<AdcType>)
    *
@@ -177,7 +177,7 @@ public:
    * and validates the result.
    *
    * @param temperature_celsius Pointer to store temperature (°C)
-   * @return Error code (NTC_SUCCESS on success)
+   * @return Error code (NtcError::Success on success)
    *
    * @note This function may take several milliseconds depending on sample_count
    *       and sample_delay_ms configuration.

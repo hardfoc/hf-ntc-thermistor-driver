@@ -110,9 +110,9 @@ bool ConvertTemperatureToResistanceBeta(float temperature_celsius,
  *       accuracy, especially at temperature extremes.
  *
  * @param resistance_ohms Thermistor resistance (ohms)
- * @param a Steinhart-Hart coefficient A (typically ~1.129e-3)
- * @param b Steinhart-Hart coefficient B (typically ~2.341e-4)
- * @param c Steinhart-Hart coefficient C (typically ~8.775e-8)
+ * @param coeff_a Steinhart-Hart coefficient A (typically ~1.129e-3)
+ * @param coeff_b Steinhart-Hart coefficient B (typically ~2.341e-4)
+ * @param coeff_c Steinhart-Hart coefficient C (typically ~8.775e-8)
  * @param temperature_celsius Pointer to store temperature (°C)
  * @return true if successful, false otherwise
  *
@@ -125,9 +125,9 @@ bool ConvertResistanceToTemperatureSteinhartHart(
 /**
  * @brief Convert temperature to resistance using Steinhart-Hart equation
  * @param temperature_celsius Temperature (°C)
- * @param a Steinhart-Hart coefficient A
- * @param b Steinhart-Hart coefficient B
- * @param c Steinhart-Hart coefficient C
+ * @param coeff_a Steinhart-Hart coefficient A
+ * @param coeff_b Steinhart-Hart coefficient B
+ * @param coeff_c Steinhart-Hart coefficient C
  * @param resistance_ohms Pointer to store resistance (ohms)
  * @return true if successful, false otherwise
  */
@@ -238,9 +238,9 @@ bool ValidateBetaValue(float beta_value) noexcept;
 
 /**
  * @brief Validate Steinhart-Hart coefficients
- * @param a Coefficient A
- * @param b Coefficient B
- * @param c Coefficient C
+ * @param coeff_a Coefficient A
+ * @param coeff_b Coefficient B
+ * @param coeff_c Coefficient C
  * @return true if valid, false otherwise
  */
 bool ValidateSteinhartHartCoefficients(float coeff_a, float coeff_b,

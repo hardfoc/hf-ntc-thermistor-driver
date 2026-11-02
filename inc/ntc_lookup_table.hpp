@@ -49,11 +49,11 @@ struct ntc_lookup_table_t {
  * Lookup tables are optimized for fast temperature conversion with minimal
  * computational overhead.
  *
- * @param ntc_type NTC thermistor type (e.g., NTC_TYPE_NTCG163JFT103FT1S)
+ * @param ntc_type NTC thermistor type (e.g., NtcType::NtcG163Jf103Ft1S)
  * @return Pointer to lookup table (nullptr if not available for this type)
  *
  * @note Not all NTC types have pre-calculated lookup tables. Use
- *       NTC_CONVERSION_MATHEMATICAL for unsupported types.
+ *       NtcConversionMethod::Mathematical for unsupported types.
  */
 const ntc_lookup_table_t *GetNtcLookupTable(int ntc_type) noexcept;
 
