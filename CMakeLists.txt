@@ -27,6 +27,13 @@ if(HF_NTC_THERMISTOR_ENABLE_WARNINGS)
   target_compile_options(${HF_NTC_THERMISTOR_TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+# ── Host unit tests and the compiled documentation snippets (tests/) ────────
+option(HF_NTC_THERMISTOR_BUILD_TESTS "Build the host unit tests in tests/" OFF)
+if(HF_NTC_THERMISTOR_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
 # ── CMake package export ─────────────────────────────────────────────────────
 include(CMakePackageConfigHelpers)
 
