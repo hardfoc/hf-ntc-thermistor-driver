@@ -1,7 +1,7 @@
 /**
  * @file test_driver.cpp
  * @brief Driver behaviour over a model of the ADC and divider, checked against the TDK NTCG163JF103FT1S
- *        resistance-temperature table (nominal values, docs/datasheet/ntcg163jf103ft1s.pdf, Table 3).
+ *        resistance-temperature table (nominal values, TDK NTCG163JF103FT1S spec sheet, Table 3).
  */
 #include "mock_adc.hpp"
 #include "test_harness.hpp"

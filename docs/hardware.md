@@ -3,7 +3,7 @@
 How to build the divider the driver expects, how to size it for your temperature range, and what limits the
 accuracy.
 
-Part values here come from the TDK [NTCG163JF103FT1S spec sheet](datasheet/ntcg163jf103ft1s.pdf), the driver's
+Part values here come from the TDK [NTCG163JF103FT1S spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S), the driver's
 default part. Values marked *derived* are computed from that sheet's nominal resistance table for a 3.3 V,
 10 kΩ / 10 kΩ divider and a 12-bit ADC; recompute them for your values.
 
@@ -123,7 +123,7 @@ datasheet.
 
 | Document | What it is for |
 | --- | --- |
-| [NTCG163JF103FT1S spec sheet](datasheet/ntcg163jf103ft1s.pdf) | R25, B, power, resistance table from −40 °C to +150 °C |
+| [NTCG163JF103FT1S spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S) | R25, B, power, resistance table from −40 °C to +150 °C |
 | [TDK NTC chip thermistors](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor) | The NTCG family and other values |
 | [ESP-IDF ADC oneshot driver](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/adc_oneshot.html) | Reading and calibrating the ADC on ESP32 |
 

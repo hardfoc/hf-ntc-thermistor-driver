@@ -47,7 +47,7 @@ Package
 Interface
 :   Analog: a resistor divider into any ADC input; the driver reads the node voltage
 
-[Spec sheet](datasheet/ntcg163jf103ft1s.pdf)
+[Spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S)
 </div>
 
 ## What you get

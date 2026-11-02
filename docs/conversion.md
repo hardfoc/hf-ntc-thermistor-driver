@@ -42,7 +42,7 @@ resistance:
 | 125 | 126.68 | +1.68 |
 | 150 | 153.19 | +3.19 |
 
-*Derived* from Table 3 of the [spec sheet](datasheet/ntcg163jf103ft1s.pdf); the host tests check the 0 °C,
+*Derived* from Table 3 of the [spec sheet](https://product.tdk.com/en/search/sensor/ntc/chip-ntc-thermistor/info?part_no=NTCG163JF103FT1S); the host tests check the 0 °C,
 25 °C, 85 °C, 125 °C and −40 °C rows. Between 10 °C and 95 °C the error stays under 0.6 °C. Outside it, use the
 Steinhart-Hart equation below, or a calibration offset near the temperature that matters to you.
 
