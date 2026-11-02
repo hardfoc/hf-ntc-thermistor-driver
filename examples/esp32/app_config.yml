@@ -21,7 +21,7 @@ apps:
   # Comprehensive Test Suite
   # --------------------------------------------------------------------------
   ntc_thermistor_comprehensive_test:
-    description: "Comprehensive NTC Thermistor driver test suite covering all functionality"
+    description: "Driver initialisation test over a simulated ADC, with a pass / fail summary"
     source_file: "ntc_thermistor_comprehensive_test.cpp"
     category: "test"
     idf_versions: ["release/v5.5"]

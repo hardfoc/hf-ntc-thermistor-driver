@@ -47,6 +47,8 @@ accept = ["200", "429", "403"]
 
 # Exclude URLs and mail addresses from checking (treated as regular expressions)
 exclude = [
+  # TDK's product pages answer 403 to non-browser clients
+  '^https://product\.tdk\.com/',
   # GNU License URLs - frequently rate limited (exact matches)
   '^https://www\.gnu\.org/licenses/gpl-3\.0/?$',
   '^https://gnu\.org/licenses/gpl-3\.0/?$',

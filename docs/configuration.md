@@ -1,213 +1,70 @@
----
-layout: default
-title: "⚙️ Configuration"
-description: "Configuration options for the NTC Thermistor driver"
-nav_order: 5
-parent: "📚 Documentation"
-permalink: /docs/configuration/
----
-
 # Configuration
 
-This guide covers all configuration options available for the NTC Thermistor driver.
+Every field of `ntc_config_t`, its default and the setter that changes it at run time.
 
-## NTC Types
+`GetDefaultNtcConfig()` returns the defaults below (the NTCG163JF103FT1S on channel 0 of a 3.3 V,
+10 kΩ divider). The constructor that takes an `NtcType` starts from the same defaults and loads that type's R25
+and B. Change any field before construction, or with `SetConfiguration()` afterwards.
 
-The driver supports predefined NTC types and custom configurations:
+## Fields
 
-### Predefined Types
+| Field | Default | Setter |
+| --- | --- | --- |
+| `type` | `NtcG163Jft103Ft1S` | constructor |
+| `resistance_at_25c` (Ω) | 10000 | `SetConfiguration()` |
+| `beta_value` (K) | 3435 | `SetBetaValue()` |
+| `reference_voltage` (V) | 3.3 | `SetReferenceVoltage()` |
+| `series_resistance` (Ω) | 10000 | `SetVoltageDivider()` |
+| `calibration_offset` (°C) | 0 | `SetCalibrationOffset()`, `Calibrate()` |
+| `conversion_method` | `Auto` | `SetConversionMethod()` |
+| `adc_channel` | 0 | `SetAdcChannel()` |
+| `adc_resolution_bits` | 12 | not used in the conversion |
+| `sample_count` | 1 | `SetSamplingParameters()` |
+| `sample_delay_ms` | 0 | `SetSamplingParameters()` |
+| `min_temperature` (°C) | −40 | `SetConfiguration()` |
+| `max_temperature` (°C) | 125 | `SetConfiguration()` |
+| `enable_filtering` | `false` | `SetFiltering()` |
+| `filter_alpha` | 0.1 | `SetFiltering()` |
 
-| NTC Type | Resistance @ 25°C | Beta Value | Temperature Range |
-|----------|-------------------|------------|-------------------|
-| `NtcG163Jft103Ft1S` | 10kΩ | 3435K | -40°C to +125°C |
-| `NtcG164Jf103Ft1S` | 10kΩ | 3435K | -40°C to +125°C |
-| `NtcG163Jf103Ft1S` | 10kΩ | 3435K | -40°C to +125°C |
-| `Custom` | Configurable | Configurable | Configurable |
+## What each one means
 
-**Location**: [`inc/ntc_types.hpp#L71`](../inc/ntc_types.hpp#L71)
+`resistance_at_25c`, `beta_value`
+:   The thermistor's R25 and B from its datasheet. B must be 1000 K to 5000 K. Use B25/85 for a range around
+    25 °C to 85 °C, B25/50 for a lower one ([Conversion methods](conversion.md#beta-equation-what-the-driver-uses)).
 
-### Using Predefined Types
+`reference_voltage`
+:   The supply of the divider, at R_SERIES, in volts. Measure it on the board ([Hardware](hardware.md#supply-and-reference)).
 
-```cpp
-// Create with predefined type
-NtcThermistor<MyAdc> thermistor(NtcType::NtcG163Jft103Ft1S, &adc);
-```
+`series_resistance`
+:   The fixed resistor between the supply and the ADC node, in ohms.
 
-### Custom Configuration
+`conversion_method`
+:   `Auto` and `Mathematical` use the Beta equation. `LookupTable` tries the type's table first and falls back
+    to Beta; the shipped table is not usable yet ([Conversion methods](conversion.md#lookup-table)).
 
-```cpp
-ntc_config_t config = {};
-config.type = NtcType::Custom;
-config.resistance_at_25c = 10000.0f;  // 10kΩ @ 25°C
-config.beta_value = 3950.0f;          // Beta value
-config.series_resistance = 10000.0f;   // 10kΩ series resistor
-config.reference_voltage = 3.3f;      // 3.3V reference
-config.adc_channel = 0;               // ADC channel
-// ... set other parameters
+`adc_channel`
+:   The channel number passed to your port. `SetAdcChannel()` asks the port's `IsChannelAvailable()` first.
 
-NtcThermistor<MyAdc> thermistor(config, &adc);
-```
+`sample_count`, `sample_delay_ms`
+:   Reads averaged per conversion, and a busy-wait between them ([API guide](api-guide.md#smooth)).
 
-## Conversion Methods
+`min_temperature`, `max_temperature`
+:   A reading outside this window returns `TemperatureOutOfRange`. Set it to what is physically possible for
+    your sensor, so a broken divider shows up as an error.
 
-The driver supports three conversion methods:
+`enable_filtering`, `filter_alpha`
+:   An exponential moving average, α from 0 to 1.
 
-| Method | Speed | Accuracy | Use Case |
-|--------|-------|----------|----------|
-| `LookupTable` | Fast | Good | Real-time applications |
-| `Mathematical` | Slower | High | Precision applications |
-| `Auto` | Balanced | Balanced | General purpose |
-
-**Location**: [`inc/ntc_types.hpp#L95`](../inc/ntc_types.hpp#L95)
-
-### Setting Conversion Method
-
-```cpp
-thermistor.SetConversionMethod(NtcConversionMethod::Mathematical);
-```
-
-## Configuration Structure
-
-The `ntc_config_t` structure contains all configuration parameters:
-
-**Location**: [`inc/ntc_types.hpp#L120`](../inc/ntc_types.hpp#L120)
+## A different thermistor
 
 ```cpp
-struct ntc_config_t {
-    NtcType type;                      // NTC type
-    float resistance_at_25c;           // Resistance at 25°C (ohms)
-    float beta_value;                  // Beta value (K)
-    float reference_voltage;           // ADC reference voltage (V)
-    float series_resistance;           // Series resistor (ohms)
-    float calibration_offset;          // Calibration offset (°C)
-    NtcConversionMethod conversion_method; // Conversion method
-    uint8_t adc_channel;               // ADC channel number
-    uint32_t adc_resolution_bits;      // ADC resolution (bits)
-    uint32_t sample_count;              // Number of samples to average
-    uint32_t sample_delay_ms;           // Delay between samples (ms)
-    float min_temperature;             // Minimum temperature (°C)
-    float max_temperature;             // Maximum temperature (°C)
-    bool enable_filtering;             // Enable temperature filtering
-    float filter_alpha;                // Filter alpha (0.0-1.0)
-};
+--8<-- "tests/docs/api_tasks.cpp:custom"
 ```
 
-## Runtime Configuration
+`type` only selects the defaults and the lookup table; `Custom` has no table, so it always uses the Beta
+equation. If your datasheet gives a resistance table but no B, compute B from two of its points with
+`NTC::CalculateBetaValue()`.
 
-### Setting Configuration
+## Next
 
-```cpp
-ntc_config_t config;
-thermistor.GetConfiguration(&config);
-config.series_resistance = 10000.0f;
-config.enable_filtering = true;
-thermistor.SetConfiguration(config);
-```
-
-### Individual Configuration Methods
-
-```cpp
-// Set conversion method
-thermistor.SetConversionMethod(NtcConversionMethod::Mathematical);
-
-// Set voltage divider
-thermistor.SetVoltageDivider(10000.0f); // 10kΩ series resistor
-
-// Set reference voltage
-thermistor.SetReferenceVoltage(3.3f);
-
-// Set beta value
-thermistor.SetBetaValue(3950.0f);
-
-// Set ADC channel
-thermistor.SetAdcChannel(0);
-
-// Set sampling parameters
-thermistor.SetSamplingParameters(5, 10); // 5 samples, 10ms delay
-
-// Enable filtering
-thermistor.SetFiltering(true, 0.1f); // Enable with alpha=0.1
-```
-
-## Default Values
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `resistance_at_25c` | 10000.0f | 10kΩ (for 10kΩ NTC) |
-| `beta_value` | 3435.0f | Beta value for NTCG163JFT103FT1S |
-| `reference_voltage` | 3.3f | 3.3V (typical MCU reference) |
-| `series_resistance` | 10000.0f | 10kΩ (matches NTC at 25°C) |
-| `conversion_method` | `Auto` | Auto-select conversion method |
-| `sample_count` | 1 | Single sample (no averaging) |
-| `sample_delay_ms` | 0 | No delay between samples |
-| `enable_filtering` | false | Filtering disabled |
-| `filter_alpha` | 0.1f | Filter coefficient |
-
-## Recommended Settings
-
-### For Real-Time Applications
-
-```cpp
-ntc_config_t config = {};
-config.conversion_method = NtcConversionMethod::LookupTable;
-config.sample_count = 1;
-config.sample_delay_ms = 0;
-config.enable_filtering = false;
-```
-
-### For High Accuracy
-
-```cpp
-ntc_config_t config = {};
-config.conversion_method = NtcConversionMethod::Mathematical;
-config.sample_count = 10;
-config.sample_delay_ms = 10;
-config.enable_filtering = true;
-config.filter_alpha = 0.1f;
-```
-
-### For Noisy Environments
-
-```cpp
-ntc_config_t config = {};
-config.sample_count = 5;
-config.sample_delay_ms = 10;
-config.enable_filtering = true;
-config.filter_alpha = 0.2f; // Higher alpha = more filtering
-```
-
-## Calibration
-
-### Calibrate Using Reference Temperature
-
-```cpp
-// Calibrate at known temperature (e.g., 25°C room temperature)
-if (thermistor.Calibrate(25.0f) == NtcError::Success) {
-    // Calibration successful
-}
-```
-
-### Manual Calibration Offset
-
-```cpp
-// Set calibration offset manually
-thermistor.SetCalibrationOffset(1.5f); // +1.5°C offset
-
-// Get current offset
-float offset;
-thermistor.GetCalibrationOffset(&offset);
-
-// Reset calibration
-thermistor.ResetCalibration();
-```
-
-## Next Steps
-
-- See [Examples](examples.md) for configuration examples
-- Review [API Reference](api_reference.md) for all configuration methods
-
----
-
-**Navigation**
-⬅️ [Platform Integration](platform_integration.md) | [Next: API Reference ➡️](api_reference.md) | [Back to Index](index.md)
-
+[API guide](api-guide.md) shows the setters in use; [Hardware](hardware.md) helps choose the divider values.

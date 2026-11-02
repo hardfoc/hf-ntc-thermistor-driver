@@ -184,7 +184,7 @@ constexpr float DEFAULT_FILTER_ALPHA_ = 0.1F; ///< Default filter alpha value
  *
  * @return ntc_config_t with default values for NTCG163JFT103FT1S
  *
- * @example
+ * @par Example
  * @code
  * ntc_config_t config = GetDefaultNtcG163Jft103Ft1SConfig();
  * config.adc_channel = 1;  // Override default channel

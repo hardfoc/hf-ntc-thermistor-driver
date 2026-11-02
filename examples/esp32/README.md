@@ -2,18 +2,18 @@
 
 This directory contains comprehensive test suites for the NTC Thermistor driver using the ESP32-C6 DevKit-M-1.
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Hardware Overview](#-hardware-overview)
-- [Test Setup](#-test-setup)
-- [Building the Tests](#-building-the-tests)
-- [Running the Tests](#-running-the-tests)
-- [Test Suites](#-test-suites)
-- [Troubleshooting](#-troubleshooting)
+- [Hardware Overview](#hardware-overview)
+- [Test Setup](#test-setup)
+- [Building the Tests](#building-the-tests)
+- [Running the Tests](#running-the-tests)
+- [Test Suites](#test-suites)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-## 🔌 Hardware Overview
+## Hardware Overview
 
 ### ESP32-C6 DevKit-M-1
 
@@ -66,7 +66,7 @@ The NTC thermistor is connected in a voltage divider configuration:
 
 ---
 
-## 📌 Test Setup
+## Test Setup
 
 ### Mock ADC Testing
 
@@ -108,7 +108,7 @@ For hardware testing with a real NTC thermistor:
 
 ---
 
-## 🚀 Building the Tests
+## Building the Tests
 
 ### Prerequisites
 
@@ -151,7 +151,7 @@ The build process will:
 
 ---
 
-## 🏃 Running the Tests
+## Running the Tests
 
 ### Flash and Monitor
 
@@ -182,7 +182,7 @@ GPIO14 toggles between HIGH/LOW for each completed test, providing visual feedba
 
 ---
 
-## 🧪 Test Suites
+## Test Suites
 
 ### Basic Tests
 
@@ -219,7 +219,7 @@ The test framework provides:
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 ### Mock ADC Configuration
 
@@ -257,7 +257,7 @@ NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Build Errors
 
@@ -319,7 +319,7 @@ NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [NTC Driver Documentation](../../README.md) - Complete driver documentation
 - [API Reference](../../docs/) - Detailed API documentation
@@ -327,7 +327,7 @@ NtcThermistor<MockEsp32Adc> thermistor(config, &mock_adc);
 
 ---
 
-## 🎯 Quick Reference
+## Quick Reference
 
 ### Build Commands
 
@@ -358,7 +358,7 @@ GPIO14 toggles between HIGH/LOW for each completed test, providing visual feedba
 
 ---
 
-## 📝 Notes
+## Notes
 
 - **Mock ADC**: Tests use mock ADC for hardware-independent testing
 - **Hardware Testing**: Optional - connect real NTC thermistor for hardware validation
