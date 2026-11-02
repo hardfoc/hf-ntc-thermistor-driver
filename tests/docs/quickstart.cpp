@@ -4,10 +4,10 @@
  */
 #include "my_adc.hpp"
 
-#include <cstdio>
-
 // --8<-- [start:quickstart]
 #include "ntc_thermistor.hpp"
+
+#include <cstdio>
 
 int read_board_temperature(MyAdc& adc, float& celsius) {
   ntc_config_t cfg = GetDefaultNtcConfig();   // NTCG163JF103FT1S: 10 kOhm at 25 C, B 3435 K
