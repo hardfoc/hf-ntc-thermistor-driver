@@ -1,0 +1,14 @@
+{
+  "driver-layers": {
+    "title": "Three layers, one of them yours",
+    "alt": "Layer diagram: the application calls the hardware-agnostic NTC thermistor driver, which uses the CRTP ADC interface, which calls the platform port you write, which reads the ADC input on the node of the voltage divider formed by the series resistor and the NTC thermistor.",
+    "description": "From top to bottom. Your application talks to one NtcThermistor<AdcType> object, whose public calls (listed from inc/ntc_thermistor.hpp) read the temperature, the resistance and the voltage, and set the divider, the sampling, the filter and the calibration. The core turns a node voltage into the thermistor's resistance and the resistance into a temperature with the Beta equation or a lookup table (inc/ntc_conversion.hpp). The ADC interface (AdcInterface in inc/ntc_adc_interface.hpp) is a CRTP base that forwards to your class. The platform port is the only code you write: a class that brings the ADC up and returns a channel's voltage and count. Below it is the hardware: the divider and the thermistor.",
+    "profile": "overview",
+    "width": 1200,
+    "source": "docs/diagrams/figures/driver-layers.py",
+    "sources": [
+      "inc/ntc_thermistor.hpp:NtcThermistor public calls",
+      "inc/ntc_adc_interface.hpp:AdcInterface"
+    ]
+  }
+}

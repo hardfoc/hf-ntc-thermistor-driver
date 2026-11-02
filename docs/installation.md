@@ -1,120 +1,68 @@
 # Installation
 
-This guide covers how to obtain, build, and verify the NTC Thermistor driver library.
+Add the driver to a CMake or ESP-IDF project. It is a small C++20 library: two source files and a header-only
+template, with no dependencies.
 
-## Prerequisites
+## Requirements
 
-Before installing the driver, ensure you have:
+- A C++20 compiler (the headers use designated initialisers): GCC 10+, Clang 12+ or a current MSVC.
+- The C++ standard library's `<cmath>`. No RTOS, heap or exceptions: every driver call is `noexcept` and
+  returns `bool` or an `NtcError`.
 
-- **C++11 Compiler**: GCC 4.8+, Clang 3.3+, or MSVC 2013+
-- **Build System**: Make or CMake (optional, for building static library)
-- **Platform SDK**: Your platform's ADC driver (ESP-IDF, STM32 HAL, Arduino, etc.)
+## Get the source
 
-## Obtaining the Source
-
-### Option 1: Git Clone
-
-```bash
-git clone https://github.com/hardfoc/hf-ntc-thermistor-driver.git
-cd hf-ntc-thermistor-driver
-```
-
-### Option 2: Copy Files
-
-Copy the following files into your project:
-
-```
-inc/
-  ├── ntc_thermistor.hpp
-  ├── ntc_adc_interface.hpp
-  ├── ntc_types.hpp
-  ├── ntc_conversion.hpp
-  └── ntc_lookup_table.hpp
-src/
-  ├── ntc_thermistor.cpp
-  ├── ntc_conversion.cpp
-  └── ntc_lookup_table.cpp
-```
-
-**Note**: The driver uses a header-only template design where implementation files are included by headers. You typically only need to include the header files in your project.
-
-## Building the Library
-
-### Using Make
-
-A simple Makefile is provided:
+A git submodule keeps the driver pinned to a version you chose:
 
 ```bash
-make
+git submodule add https://github.com/hardfoc/hf-ntc-thermistor-driver.git external/hf-ntc-thermistor-driver
+git submodule update --init external/hf-ntc-thermistor-driver
 ```
 
-This builds `build/libntc_thermistor.a` which can be linked into your application.
+Only `inc/`, `src/`, `cmake/` and `CMakeLists.txt` are needed to build. The examples have their own submodule
+(`examples/esp32/scripts`); you do not need it to use the driver.
 
-### Using CMake
+## CMake
 
 ```cmake
-add_subdirectory(ntc-thermistor-driver)
-target_link_libraries(your_target PRIVATE ntc_thermistor)
+add_subdirectory(external/hf-ntc-thermistor-driver)
+target_link_libraries(my_app PRIVATE hf_ntc_thermistor)
 ```
 
-Or manually:
+The `hf_ntc_thermistor` target is a static library (`src/ntc_conversion.cpp`, `src/ntc_lookup_table.cpp`). It
+carries the include directories and requires C++20 (`cxx_std_20`), so your target does not need to set either.
 
-```cmake
-add_library(ntc_thermistor STATIC
-    inc/ntc_thermistor.hpp
-    inc/ntc_adc_interface.hpp
-    inc/ntc_types.hpp
-    inc/ntc_conversion.hpp
-    inc/ntc_lookup_table.hpp
-    src/ntc_thermistor.cpp
-    src/ntc_conversion.cpp
-    src/ntc_lookup_table.cpp
-)
-target_include_directories(ntc_thermistor PUBLIC inc)
+| Option | Default | Effect |
+| --- | --- | --- |
+| `HF_NTC_THERMISTOR_ENABLE_WARNINGS` | `OFF` | `-Wall -Wextra -Wpedantic` on the driver sources |
+| `HF_NTC_THERMISTOR_BUILD_TESTS` | `OFF` | Builds the host unit tests in `tests/` ([Testing and CI](testing.md)) |
+
+## ESP-IDF
+
+The ESP-IDF component wrapper is
+[`examples/esp32/components/hf_ntc_thermistor/`](../examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt).
+Copy that folder into your project's `components/` (or point `EXTRA_COMPONENT_DIRS` at it) and set the
+`HF_NTC_THERMISTOR_ROOT` cache variable to the driver checkout; the wrapper stops with a clear message when the
+path is wrong. Your component then declares `REQUIRES hf_ntc_thermistor`.
+
+## How the build is organised
+
+| Layer | File | Role |
+| --- | --- | --- |
+| Settings | [`cmake/hf_ntc_thermistor_build_settings.cmake`](../cmake/hf_ntc_thermistor_build_settings.cmake) | Sources, include directories, version: the single source of truth |
+| Library | [`CMakeLists.txt`](../CMakeLists.txt) | Static library for host builds and CI |
+| ESP-IDF | [`examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt`](../examples/esp32/components/hf_ntc_thermistor/CMakeLists.txt) | IDF component wrapper over the same settings |
+
+The version is set once in the settings file and written into `ntc_thermistor_version.h` at configure time.
+Read it at run time:
+
+```cpp
+const char* v = GetNtcThermistorDriverVersion();   // "1.0.0"
 ```
 
-### Using ESP-IDF Component
+The root `CMakeLists.txt` writes a package configuration but has no `install()` rules yet: use the driver with
+`add_subdirectory()` or the ESP-IDF component, not `find_package()`.
 
-The driver can be used as an ESP-IDF component. See the [examples/esp32](../examples/esp32/) directory for component integration examples.
+## Next
 
-## Running Unit Tests
-
-The library includes unit tests. To run them:
-
-```bash
-make test
-./build/test
-```
-
-Expected output:
-```
-All tests passed.
-```
-
-## Verification
-
-To verify the installation:
-
-1. Include the header in a test file:
-   ```cpp
-   #include "ntc_thermistor.hpp"
-   ```
-
-2. Compile a simple test:
-   ```bash
-   g++ -std=c++11 -I inc/ -c src/ntc_thermistor.cpp -o test.o
-   ```
-
-3. If compilation succeeds, the library is properly installed.
-
-## Next Steps
-
-- Follow the [Quick Start](quickstart.md) guide to create your first application
-- Review [Hardware Setup](hardware_setup.md) for voltage divider circuit wiring
-- Check [Platform Integration](platform_integration.md) to implement the ADC interface
-
----
-
-**Navigation**
-⬅️ [Back to Index](index.md) | [Next: Quick Start ➡️](quickstart.md)
-
+[Quickstart](quickstart.md) wires a divider and reads a temperature; [Porting](porting.md) writes the ADC
+interface for your MCU.

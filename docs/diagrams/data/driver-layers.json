@@ -1,0 +1,33 @@
+{
+  "calls": [
+    "Initialize",
+    "SetConfiguration",
+    "ReadTemperatureCelsius",
+    "ReadTemperature",
+    "GetResistance",
+    "GetVoltage",
+    "GetRawAdcValue",
+    "Calibrate",
+    "SetCalibrationOffset",
+    "SetConversionMethod",
+    "SetVoltageDivider",
+    "SetReferenceVoltage",
+    "SetBetaValue",
+    "SetAdcChannel",
+    "SetSamplingParameters",
+    "SetFiltering"
+  ],
+  "port_hooks": [
+    "IsInitialized",
+    "EnsureInitialized",
+    "IsChannelAvailable",
+    "ReadChannelCount",
+    "ReadChannelV",
+    "GetReferenceVoltage",
+    "GetResolutionBits"
+  ],
+  "sources": [
+    "inc/ntc_thermistor.hpp:NtcThermistor public calls",
+    "inc/ntc_adc_interface.hpp:AdcInterface"
+  ]
+}

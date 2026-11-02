@@ -1,261 +1,63 @@
 # Troubleshooting
 
-This guide helps you diagnose and resolve common issues when using the NTC Thermistor driver.
-
-## Common Error Messages
-
-### Error: Not Initialized
-
-**Symptoms:**
-- `Initialize()` returns `false`
-- Methods return `NtcError::NotInitialized`
-
-**Solutions:**
-1. **Call Initialize() first**:
-   ```cpp
-   if (!thermistor.Initialize()) {
-       // Check ADC interface and configuration
-   }
-   ```
-
-2. **Verify ADC interface**:
-   - Ensure ADC interface is properly implemented
-   - Check that `EnsureInitialized()` succeeds
-
-3. **Check configuration**:
-   - Verify all configuration parameters are valid
-   - Check ADC channel is available
-
----
-
-### Error: ADC Read Failed
-
-**Symptoms:**
-- `ReadTemperatureCelsius()` returns `NtcError::AdcReadFailed`
-- Temperature readings fail
-
-**Solutions:**
-1. **Verify ADC interface implementation**:
-   - Check `ReadChannelV()` implementation
-   - Verify ADC is properly initialized
+Symptoms you may see while bringing up an NTC thermistor, their causes and the fix for each.
 
-2. **Check hardware connections**:
-   - Verify voltage divider circuit is wired correctly
-   - Check ADC channel matches physical connection
-   - Ensure power supply is stable
+Start with the voltage: `GetVoltage()` and `GetResistance()` on a failing reading tell wiring and ADC problems
+(the voltage is wrong) apart from configuration problems (the resistance is right, the degrees are not).
 
-3. **Verify ADC configuration**:
-   - Check reference voltage matches hardware
-   - Verify ADC resolution settings
+## Initialize() returns false
 
----
+| Cause | Check | Fix |
+| --- | --- | --- |
+| ADC not up | Your port's `EnsureInitialized()` | Fix the SDK call |
+| Channel missing | `IsChannelAvailable(adc_channel)` in your port | Use a channel the port accepts |
+| Invalid config | R25, supply or series resistor not positive; B outside 1000 K to 5000 K; `min_temperature` ≥ `max_temperature`; `sample_count` 0 | Correct the value; `SetConfiguration()` returns `InvalidParameter` for the same cases |
+| No port | `nullptr` passed to the constructor | Pass the port's address |
 
-### Error: Temperature Out of Range
+## Temperature conversion failed
 
-**Symptoms:**
-- `ReadTemperatureCelsius()` returns `NtcError::TemperatureOutOfRange`
-- Temperature values are invalid
+The node reads 0 V or the supply, or the resistance is outside 0.1 Ω to 1 MΩ.
 
-**Solutions:**
-1. **Check temperature limits**:
-   ```cpp
-   ntc_config_t config;
-   thermistor.GetConfiguration(&config);
-   // Adjust min_temperature and max_temperature if needed
-   ```
+| Cause | Check | Fix |
+| --- | --- | --- |
+| Thermistor shorted or missing to the node | `GetVoltage()` near 0 V | Wiring, solder joints |
+| Thermistor open | `GetVoltage()` near the supply | Wiring, connector, cable |
+| Port returns counts, not volts | `GetVoltage()` returns thousands | Return volts from `ReadChannelV()` ([Porting](porting.md)) |
+| `reference_voltage` below the real supply | `GetVoltage()` above `reference_voltage` | Set the divider's real supply |
 
-2. **Verify circuit configuration**:
-   - Check series resistance matches configuration
-   - Verify NTC resistance at 25°C is correct
-   - Ensure reference voltage is accurate
+## Temperature out of range
 
-3. **Check for hardware issues**:
-   - Verify NTC thermistor is functioning
-   - Check for loose connections
-   - Test with multimeter
+The conversion worked but the result is outside `min_temperature` to `max_temperature` (−40 °C to +125 °C by
+default). Read `GetResistance()`: if it matches the thermistor's table at the real temperature, widen the window;
+if not, see the next section. A part near a hot spot may be right.
 
----
+## Off by a few degrees
 
-## Hardware Issues
+| Cause | Check | Fix |
+| --- | --- | --- |
+| Wrong supply value | Measure the divider supply | Set `reference_voltage` to it: 1 % is about 0.5 °C at 25 °C |
+| Wrong series resistor | Measure it | Set `series_resistance` |
+| Uncalibrated ADC | `GetVoltage()` against a meter | Use your SDK's ADC calibration in `ReadChannelV()` |
+| Beta error far from 25 °C to 85 °C | The error grows with distance: +4.4 °C at −40 °C for this part | Steinhart-Hart or a calibration offset ([Conversion methods](conversion.md)) |
+| Wrong B for the part | B25/50 and B25/85 differ by 1 % to 2 % | Use the B for your range |
+| Self-heating | Reading drops when you lower the divider current | Larger resistors, or power the divider only while sampling ([Hardware](hardware.md#self-heating)) |
+| `LookupTable` method | The setting in `conversion_method` | Use `Auto` ([Conversion methods](conversion.md#lookup-table)) |
 
-### Incorrect Temperature Readings
+## Reading moves the wrong way
 
-**Symptoms:**
-- Temperature readings are consistently wrong
-- Readings don't change with temperature
+The temperature falls as the part heats: the thermistor is on the high side of the divider. Swap the two
+parts, or return V<sub>REF</sub> − V<sub>NODE</sub> from the port ([Hardware](hardware.md#divider)).
 
-**Checklist:**
-- [ ] Verify voltage divider circuit is wired correctly
-- [ ] Check series resistor value matches configuration
-- [ ] Verify NTC resistance at 25°C matches configuration
-- [ ] Check reference voltage matches hardware (3.3V or 5V)
-- [ ] Ensure ADC channel matches physical connection
-- [ ] Verify NTC thermistor is functioning (test with multimeter)
+## Noisy readings
 
-**Solutions:**
-1. **Calibrate the sensor**:
-   ```cpp
-   // Calibrate at known temperature
-   thermistor.Calibrate(25.0f);
-   ```
+| Cause | Fix |
+| --- | --- |
+| ADC noise | `SetSamplingParameters(16, 0)` |
+| Slow drift or ripple | `SetFiltering(true, 0.1F)`; a smaller α smooths more |
+| Long wire to the sensor, high source resistance | C_FILT, 10 nF to 100 nF from the node to ground |
+| Supply ripple | Feed the divider from a clean rail ([Hardware](hardware.md#supply-and-reference)) |
 
-2. **Check configuration values**:
-   ```cpp
-   ntc_config_t config;
-   thermistor.GetConfiguration(&config);
-   // Verify all values match hardware
-   ```
+## Calibration made it worse
 
----
-
-### Noisy Readings
-
-**Symptoms:**
-- Temperature readings fluctuate
-- Unstable values
-
-**Solutions:**
-1. **Enable filtering**:
-   ```cpp
-   thermistor.SetFiltering(true, 0.1f); // Enable with alpha=0.1
-   ```
-
-2. **Use multi-sample averaging**:
-   ```cpp
-   thermistor.SetSamplingParameters(5, 10); // 5 samples, 10ms delay
-   ```
-
-3. **Check hardware**:
-   - Verify power supply is stable
-   - Check for noise sources near ADC input
-   - Use proper grounding
-
----
-
-## Software Issues
-
-### Compilation Errors
-
-**Error: "No matching function"**
-
-**Solution:**
-- Ensure you've implemented all required `AdcInterface` methods
-- Check method signatures match exactly
-
-**Error: "Undefined reference"**
-
-**Solution:**
-- Verify you're including/linking the driver source
-- Check include paths are correct
-
----
-
-### Runtime Errors
-
-**Initialization Fails**
-
-**Checklist:**
-- [ ] ADC interface is properly implemented
-- [ ] ADC channel is available
-- [ ] Configuration parameters are valid
-- [ ] ADC is initialized
-
-**Invalid Readings**
-
-**Checklist:**
-- [ ] Driver is initialized
-- [ ] ADC interface is working
-- [ ] Configuration matches hardware
-- [ ] Error codes are checked
-
----
-
-## Debugging Tips
-
-### Enable Debug Output
-
-Add debug prints to your ADC interface:
-
-```cpp
-ntc::AdcError ReadChannelV(uint8_t channel, float* voltage_v) {
-    printf("Reading ADC channel %u\n", channel);
-    // ... your implementation
-    printf("Voltage: %.3fV\n", *voltage_v);
-    return ntc::AdcError::Success;
-}
-```
-
-### Check Configuration
-
-```cpp
-ntc_config_t config;
-thermistor.GetConfiguration(&config);
-printf("Series resistance: %.1fΩ\n", config.series_resistance);
-printf("Reference voltage: %.2fV\n", config.reference_voltage);
-printf("ADC channel: %u\n", config.adc_channel);
-```
-
-### Verify ADC Readings
-
-```cpp
-float voltage;
-if (adc.ReadChannelV(0, &voltage) == ntc::AdcError::Success) {
-    printf("ADC voltage: %.3fV\n", voltage);
-    // Should be between 0V and reference voltage
-}
-```
-
----
-
-## FAQ
-
-### Q: Why are my temperature readings incorrect?
-
-**A:** Common causes:
-1. Series resistance doesn't match configuration
-2. Reference voltage is incorrect
-3. NTC resistance at 25°C is wrong
-4. ADC channel mismatch
-5. Need calibration
-
-### Q: How do I calibrate the sensor?
-
-**A:** Use the `Calibrate()` method with a known reference temperature:
-```cpp
-thermistor.Calibrate(25.0f); // Calibrate at 25°C
-```
-
-### Q: What's the difference between lookup table and mathematical conversion?
-
-**A:**
-- **Lookup Table**: Faster, slightly less accurate, uses pre-calculated values
-- **Mathematical**: Slower, more accurate, uses Steinhart-Hart or Beta equations
-
-### Q: How do I reduce noise in readings?
-
-**A:**
-1. Enable filtering: `thermistor.SetFiltering(true, 0.1f)`
-2. Use multi-sample averaging: `thermistor.SetSamplingParameters(5, 10)`
-3. Check hardware for noise sources
-
----
-
-## Getting More Help
-
-If you're still experiencing issues:
-
-1. Check the [API Reference](api_reference.md) for method details
-2. Review [Examples](examples.md) for working code
-3. Search existing issues on GitHub
-4. Open a new issue with:
-   - Description of the problem
-   - Steps to reproduce
-   - Hardware setup details
-   - Error messages/logs
-   - Configuration values
-
----
-
-**Navigation**
-⬅️ [Examples](examples.md) | [Back to Index](index.md)
-
+`Calibrate()` measures with the current offset applied and replaces it. Call `ResetCalibration()` before
+`Calibrate()`, and calibrate at the temperature you care about most.

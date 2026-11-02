@@ -1,134 +1,75 @@
-# Quick Start
+# Quickstart
 
-This guide will get you up and running with the NTC Thermistor driver in just a few steps.
+Read a temperature from your MCU: wire a divider, write a small ADC port class, call two driver functions.
 
-## Prerequisites
+## 1. Wire it
 
-- [Driver installed](installation.md)
-- [Hardware wired](hardware_setup.md) (voltage divider circuit)
-- [ADC interface implemented](platform_integration.md)
+The thermistor sits between the ADC node and ground; the series resistor between the supply and the node.
 
-## Minimal Example
+![Voltage divider: V_REF through the series resistor to the ADC node, the NTC thermistor from the node to
+ground, and an optional filter capacitor from the node to ground](assets/ntc-divider.svg){ .hf-plate }
 
-Here's a complete working example:
+| From | To | Notes |
+| --- | --- | --- |
+| 3.3 V | R_SERIES | 10 kΩ, 1 % or better; the supply value goes in `reference_voltage` |
+| R_SERIES | ADC input | The divider node |
+| ADC input | NTC | NTCG163JF103FT1S or any 10 kΩ NTC |
+| NTC | GND | Same ground as the ADC |
 
-```cpp
-#include "ntc_thermistor.hpp"
+Keep the node voltage inside the ADC's input range. With 3.3 V and 10 kΩ / 10 kΩ it is 1.65 V at 25 °C and
+moves toward 0 V as the sensor heats. The [Hardware](hardware.md) page covers resistor choice, filtering and
+self-heating.
 
-// 1. Implement the ADC interface
-class MyAdc : public ntc::AdcInterface<MyAdc> {
-public:
-    bool IsInitialized() const { return initialized_; }
-    bool EnsureInitialized() { /* your ADC init */ return true; }
-    bool IsChannelAvailable(uint8_t channel) const { return channel < 8; }
-    ntc::AdcError ReadChannelCount(uint8_t channel, uint32_t* count) {
-        // Your ADC read implementation
-        *count = /* read ADC */;
-        return ntc::AdcError::Success;
-    }
-    ntc::AdcError ReadChannelV(uint8_t channel, float* voltage_v) {
-        // Your ADC read implementation
-        *voltage_v = /* read voltage */;
-        return ntc::AdcError::Success;
-    }
-    float GetReferenceVoltage() const { return 3.3f; }
-    uint8_t GetResolutionBits() const { return 12; }
-private:
-    bool initialized_ = false;
-};
+## 2. Add the driver
 
-// 2. Create instances
-MyAdc adc;
-NtcThermistor<MyAdc> thermistor(NtcType::NtcG163Jft103Ft1S, &adc);
+Add the repository as a submodule and link the `hf_ntc_thermistor` CMake target.
+[Installation](installation.md) covers CMake and ESP-IDF.
 
-// 3. Initialize
-if (!thermistor.Initialize()) {
-    // Handle initialization error
-    return;
-}
-
-// 4. Read temperature
-float temp_c;
-if (thermistor.ReadTemperatureCelsius(&temp_c) == NtcError::Success) {
-    printf("Temperature: %.2f°C\n", temp_c);
-}
+```bash
+git submodule add https://github.com/hardfoc/hf-ntc-thermistor-driver.git external/hf-ntc-thermistor-driver
 ```
 
-## Step-by-Step Explanation
+## 3. Write the port
 
-### Step 1: Include the Header
+The port is the only platform code. It brings the ADC up and returns a channel's voltage and raw count. Replace
+the two `platform_*` calls with your SDK's.
 
-```cpp
-#include "ntc_thermistor.hpp"
+```cpp title="my_adc.hpp"
+--8<-- "tests/docs/my_adc.hpp:port"
 ```
 
-### Step 2: Implement the ADC Interface
+Return the calibrated voltage at the pin from `ReadChannelV()`: the driver computes the resistance from it.
+[Porting](porting.md) explains each method.
 
-You need to implement the `AdcInterface` for your platform. See [Platform Integration](platform_integration.md) for detailed examples for ESP32, STM32, and Arduino.
+## 4. Read the temperature
 
-The interface requires:
-- `IsInitialized()` - Check if ADC is initialized
-- `EnsureInitialized()` - Initialize ADC if needed
-- `IsChannelAvailable(uint8_t)` - Check if channel is valid
-- `ReadChannelCount(uint8_t, uint32_t*)` - Read raw ADC count
-- `ReadChannelV(uint8_t, float*)` - Read voltage
-- `GetReferenceVoltage()` - Get ADC reference voltage
-- `GetResolutionBits()` - Get ADC resolution
-
-### Step 3: Create Driver Instance
-
-```cpp
-MyAdc adc;
-NtcThermistor<MyAdc> thermistor(NtcType::NtcG163Jft103Ft1S, &adc);
+```cpp title="main.cpp"
+--8<-- "tests/docs/quickstart.cpp:quickstart"
 ```
 
-The constructor takes:
-- NTC type (predefined or custom)
-- Pointer to your ADC interface implementation
+What each step does:
 
-### Step 4: Initialize
+1. `adc_channel` selects the input your port reads.
+2. `series_resistance` is the resistor between the supply and the node, in ohms.
+3. `reference_voltage` is the divider's supply voltage. The driver solves
+   R<sub>NTC</sub> = R<sub>SERIES</sub> · V / (V<sub>REF</sub> − V) with it.
+4. `Initialize()` checks the configuration, brings the ADC up and checks the channel.
+5. `ReadTemperatureCelsius()` reads the voltage, converts it and checks the result against
+   `min_temperature` / `max_temperature` (−40 °C to +125 °C by default).
 
-```cpp
-if (!thermistor.Initialize()) {
-    // Handle initialization failure
-}
-```
+This example is built by the host CI, so it compiles against the current headers.
 
-`Initialize()` validates configuration, checks ADC interface, and prepares the driver for use.
+## If it does not work
 
-### Step 5: Read Temperature
+| Symptom | First thing to check |
+| --- | --- |
+| `Initialize()` returns `false` | `EnsureInitialized()` and `IsChannelAvailable()` in your port; a zero or negative value in the config |
+| `Temperature conversion failed` | The node reads 0 V (thermistor shorted) or the supply (thermistor open) |
+| A few degrees off at every temperature | `reference_voltage` or `series_resistance` differ from the board |
+| Reading moves the wrong way | Thermistor and series resistor swapped ([Hardware](hardware.md#divider)) |
 
-```cpp
-float temp_c;
-if (thermistor.ReadTemperatureCelsius(&temp_c) == NtcError::Success) {
-    // Use temperature value
-}
-```
+## Next
 
-## Expected Output
-
-When running this example:
-- Temperature reading in Celsius should be displayed
-- Value should be within the configured temperature range
-- No error messages should appear
-
-## Troubleshooting
-
-If you encounter issues:
-
-- **Compilation errors**: Check that you've implemented all required ADC interface methods
-- **Initialization fails**: Verify hardware connections, ADC channel, and configuration
-- **Invalid readings**: Check voltage divider circuit, series resistance, and reference voltage
-- **See**: [Troubleshooting](troubleshooting.md) for common issues
-
-## Next Steps
-
-- Explore [Examples](examples.md) for more advanced usage
-- Review the [API Reference](api_reference.md) for all available methods
-- Check [Configuration](configuration.md) for customization options
-
----
-
-**Navigation**
-⬅️ [Installation](installation.md) | [Next: Hardware Setup ➡️](hardware_setup.md) | [Back to Index](index.md)
-
+- [API guide](api-guide.md): averaging, filtering, calibration and error handling.
+- [Configuration](configuration.md): every field of `ntc_config_t`, and other thermistors.
+- [Conversion methods](conversion.md): how accurate the Beta equation is for this part.
