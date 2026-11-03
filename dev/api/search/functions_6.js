@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['getcalibrationoffset_0',['GetCalibrationOffset',['../class_ntc_thermistor.html#a6d7a4685e6dc9b00e739a8b53087fee3',1,'NtcThermistor']]],
+  ['getconfiguration_1',['GetConfiguration',['../class_ntc_thermistor.html#a8be6996e58c278bdac963b70d051560f',1,'NtcThermistor']]],
+  ['getdefaultntcconfig_2',['GetDefaultNtcConfig',['../ntc__types_8hpp.html#a58e0e79d99c0beccd7302517e3189368',1,'ntc_types.hpp']]],
+  ['getdefaultntcg163jft103ft1sconfig_3',['GetDefaultNtcG163Jft103Ft1SConfig',['../ntc__types_8hpp.html#aed0efaecd8f1495f4ca0d7806922ddfd',1,'ntc_types.hpp']]],
+  ['getdriverversion_4',['GetDriverVersion',['../class_ntc_thermistor.html#a314c1e98d064423b881f6dab4e8af0ac',1,'NtcThermistor']]],
+  ['getdriverversionmajor_5',['GetDriverVersionMajor',['../class_ntc_thermistor.html#ad408342be075f729b637c36ee6d68cc1',1,'NtcThermistor']]],
+  ['getdriverversionminor_6',['GetDriverVersionMinor',['../class_ntc_thermistor.html#af939aa82752a679d553160a16e90581e',1,'NtcThermistor']]],
+  ['getdriverversionpatch_7',['GetDriverVersionPatch',['../class_ntc_thermistor.html#a172408dae9ec54c41992b2c88d34aaf8',1,'NtcThermistor']]],
+  ['geterrorstring_8',['GetErrorString',['../class_ntc_thermistor.html#a904c3213613a75433756f000542259d5',1,'NtcThermistor']]],
+  ['getlookuptablestats_9',['GetLookupTableStats',['../namespace_n_t_c.html#a97153a082bce98d23da1dd159e00b29e',1,'NTC']]],
+  ['getntcg163jf103ft1slookuptable_10',['GetNtcG163Jf103Ft1sLookupTable',['../namespace_n_t_c.html#a1b6cb12400525c268d9bf212b6e73d36',1,'NTC']]],
+  ['getntcg163jft103ft1slookuptable_11',['GetNtcG163Jft103Ft1sLookupTable',['../namespace_n_t_c.html#a0ca7327314a4d0f8a041fc904f332ac2',1,'NTC']]],
+  ['getntcg164jf103ft1slookuptable_12',['GetNtcG164Jf103Ft1sLookupTable',['../namespace_n_t_c.html#a12f1182493f0efa43e9c7cd93abab1c0',1,'NTC']]],
+  ['getntclookuptable_13',['GetNtcLookupTable',['../namespace_n_t_c.html#ae9f4370d062be80682f51e690d7033cb',1,'NTC']]],
+  ['getntcthermistordriverversion_14',['GetNtcThermistorDriverVersion',['../ntc__thermistor_8hpp.html#abfde514bf475c8eebda7ad36a5bd3d19',1,'ntc_thermistor.hpp']]],
+  ['getrawadcvalue_15',['GetRawAdcValue',['../class_ntc_thermistor.html#ac3721322696d11ee55f3d1b95b36db90',1,'NtcThermistor']]],
+  ['getreferencevoltage_16',['GetReferenceVoltage',['../classntc_1_1_adc_interface.html#a0545102b48082bc0d535f9623bcfb45d',1,'ntc::AdcInterface']]],
+  ['getresistance_17',['GetResistance',['../class_ntc_thermistor.html#a6f6c51a6139324f020d50a56416a2cd3',1,'NtcThermistor']]],
+  ['getresolutionbits_18',['GetResolutionBits',['../classntc_1_1_adc_interface.html#a03934e879e80ff16df2df59ed91066b6',1,'ntc::AdcInterface']]],
+  ['gettypestring_19',['GetTypeString',['../class_ntc_thermistor.html#a61d208940fed34c62ed4da7b97160c5d',1,'NtcThermistor']]],
+  ['getvoltage_20',['GetVoltage',['../class_ntc_thermistor.html#a0a6295bd186d9883e9495f1e32a95b9c',1,'NtcThermistor']]]
+];
